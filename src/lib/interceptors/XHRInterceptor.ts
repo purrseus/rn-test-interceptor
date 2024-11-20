@@ -1,3 +1,6 @@
+import 'react-native-get-random-values';
+
+import { nanoid } from 'nanoid';
 import NetworkInterceptor from './NetworkInterceptor';
 
 const originalXHROpen = XMLHttpRequest.prototype.open;
@@ -29,7 +32,9 @@ export default class XHRInterceptor extends NetworkInterceptor {
     const isInterceptorEnabled = () => this.isInterceptorEnabled;
 
     XMLHttpRequest.prototype.open = function (method, url) {
-      openCallback?.(method, url);
+      this._interceptionId = nanoid();
+
+      openCallback?.(this._interceptionId, 'xhr',method, url);
 
       originalXHROpen.apply(
         this,
@@ -38,7 +43,7 @@ export default class XHRInterceptor extends NetworkInterceptor {
     };
 
     XMLHttpRequest.prototype.setRequestHeader = function (header, value) {
-      requestHeaderCallback?.(header, value);
+      requestHeaderCallback?.(this._interceptionId, header, value);
 
       originalXHRSetRequestHeader.apply(
         this,
@@ -47,7 +52,7 @@ export default class XHRInterceptor extends NetworkInterceptor {
     };
 
     XMLHttpRequest.prototype.send = function (data) {
-      sendCallback?.(data);
+      sendCallback?.(this._interceptionId, data);
 
       this.addEventListener?.('readystatechange', () => {
         if (!isInterceptorEnabled()) return;
@@ -66,6 +71,7 @@ export default class XHRInterceptor extends NetworkInterceptor {
             responseSize = parseInt(contentLengthString, 10);
 
           headerReceivedCallback?.(
+            this._interceptionId,
             responseContentType,
             responseSize,
             this.getAllResponseHeaders(),
@@ -74,6 +80,7 @@ export default class XHRInterceptor extends NetworkInterceptor {
 
         if (this.readyState === this.DONE) {
           responseCallback?.(
+            this._interceptionId,
             this.status,
             this.timeout,
             this.response,
@@ -96,7 +103,6 @@ export default class XHRInterceptor extends NetworkInterceptor {
     if (!this.isInterceptorEnabled) return;
 
     this.isInterceptorEnabled = false;
-
 
     XMLHttpRequest.prototype.send = originalXHRSend;
     XMLHttpRequest.prototype.open = originalXHROpen;

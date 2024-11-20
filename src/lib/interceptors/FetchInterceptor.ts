@@ -1,4 +1,8 @@
+import 'react-native-get-random-values';
+
+import { nanoid } from 'nanoid';
 import NetworkInterceptor from './NetworkInterceptor';
+import { createHeaderLine } from '../utils';
 
 const originalFetch = global.fetch;
 
@@ -25,6 +29,9 @@ export default class FetchInterceptor extends NetworkInterceptor {
     } = this.getCallbacks();
 
     global.fetch = async function (input, init) {
+      const interceptionId = nanoid();
+
+      //#region open
       const method = init?.method ?? 'GET';
 
       let url: string;
@@ -40,40 +47,47 @@ export default class FetchInterceptor extends NetworkInterceptor {
           url = input;
       }
 
-      openCallback?.(method, url);
+      openCallback?.(interceptionId, 'fetch', method, url);
+      //#endregion
 
+      //#region requestHeader
       const headers = init?.headers;
-      if (!headers) {
-        requestHeaderCallback?.('', '');
-      } else {
+      if (headers) {
         switch (true) {
           case headers instanceof Headers:
             for (const [headerKey, headerValue] of headers.entries()) {
-              requestHeaderCallback?.(headerKey, headerValue);
+              requestHeaderCallback?.(interceptionId, headerKey, headerValue);
             }
             break;
           case Array.isArray(headers):
             for (const [headerKey, headerValue] of headers) {
-              requestHeaderCallback?.(headerKey, headerValue);
+              requestHeaderCallback?.(interceptionId, headerKey, headerValue);
             }
             break;
           default:
             for (const key in headers) {
-              requestHeaderCallback?.(key, headers[key]);
+              requestHeaderCallback?.(interceptionId, key, headers[key]);
             }
             break;
         }
       }
+      //#endregion
 
-      sendCallback?.(init);
+      //#region send
+      sendCallback?.(interceptionId, init?.body ?? null);
+      //#endregion
 
       const response = await originalFetch.apply(
         this,
         arguments as unknown as Parameters<typeof originalFetch>,
       );
 
-      const contentTypeString = response.headers.get('Content-Type');
-      const contentLengthString = response.headers.get('Content-Length');
+      const clonedResponse = response.clone();
+      const clonedResponseHeaders = clonedResponse.headers;
+
+      //#region headerReceived
+      const contentTypeString = clonedResponseHeaders.get('Content-Type');
+      const contentLengthString = clonedResponseHeaders.get('Content-Length');
 
       let responseContentType: string | undefined;
       let responseSize: number | undefined;
@@ -84,34 +98,30 @@ export default class FetchInterceptor extends NetworkInterceptor {
 
       if (contentLengthString) responseSize = parseInt(contentLengthString, 10);
 
-      for (const [headerKey, headerValue] of response.headers.entries()) {
-        responseHeaders += `${headerKey}: ${headerValue}\n`;
+      for (const [headerKey, headerValue] of clonedResponseHeaders.entries()) {
+        responseHeaders += createHeaderLine(headerKey, headerValue);
       }
 
       headerReceivedCallback?.(
+        interceptionId,
         responseContentType,
         responseSize,
         responseHeaders,
       );
+      //#endregion
 
-      const clonedResponse = response.clone();
-
-      const isJson = !!clonedResponse.headers
-        .get('Content-Type')
-        ?.includes('json');
-
-      const responseBody = await (isJson
-        ? clonedResponse.json()
-        : clonedResponse.text()
-      ).catch(() => null);
+      //#region response
+      const responseBody: string | null = await clonedResponse.text().catch(() => null);
 
       responseCallback?.(
-        response.status,
+        interceptionId,
+        clonedResponse.status,
         0,
         responseBody,
-        response.url,
-        response.type,
+        clonedResponse.url,
+        clonedResponse.type,
       );
+      //#endregion
 
       return response;
     };

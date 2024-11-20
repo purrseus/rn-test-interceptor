@@ -1,31 +1,19 @@
+import type {
+  OpenCallback,
+  RequestHeaderCallback,
+  SendCallback,
+  HeaderReceivedCallback,
+  ResponseCallback,
+} from '../core/types';
+
 export default abstract class NetworkInterceptor {
   isInterceptorEnabled = false;
 
-  protected openCallback: ((method: string, url: string) => void) | null = null;
-
-  protected requestHeaderCallback:
-    | ((header: string, value: string) => void)
-    | null = null;
-
-  protected sendCallback: ((data?: any) => void) | null = null;
-
-  protected headerReceivedCallback:
-    | ((
-        responseContentType: string | undefined,
-        responseSize: number | undefined,
-        responseHeaders: string,
-      ) => void)
-    | null = null;
-
-  protected responseCallback:
-    | ((
-        status: number | undefined,
-        timeout: number | undefined,
-        response: any,
-        responseURL: string | undefined,
-        responseType: string | undefined,
-      ) => void)
-    | null = null;
+  protected openCallback: OpenCallback = null;
+  protected requestHeaderCallback: RequestHeaderCallback = null;
+  protected sendCallback: SendCallback = null;
+  protected headerReceivedCallback: HeaderReceivedCallback = null;
+  protected responseCallback: ResponseCallback = null;
 
   setOpenCallback(callback: typeof this.openCallback) {
     this.openCallback = callback;

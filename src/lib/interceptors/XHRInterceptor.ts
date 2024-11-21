@@ -1,5 +1,5 @@
 import { NetworkType } from '../types';
-import { getInterceptorId } from '../utils';
+import { getHttpInterceptorId } from '../utils';
 import HttpInterceptor from './HttpInterceptor';
 
 const originalXHROpen = XMLHttpRequest.prototype.open;
@@ -27,7 +27,7 @@ export default class XHRInterceptor extends HttpInterceptor {
     const isInterceptorEnabled = () => this.isInterceptorEnabled;
 
     XMLHttpRequest.prototype.open = function (method, url) {
-      this._interceptionId = getInterceptorId();
+      this._interceptionId = getHttpInterceptorId();
 
       openCallback?.(this._interceptionId, NetworkType.XHR, method, url);
 

@@ -2,9 +2,6 @@ import { enableMapSet } from 'immer';
 import { useCallback, useEffect } from 'react';
 import { useImmer } from 'use-immer';
 import { NETWORK_INSPECTOR_REQUEST_HEADER } from './constants';
-import FetchInterceptor from './interceptors/FetchInterceptor';
-import WebSocketInterceptor from './interceptors/WebSocketInterceptor';
-import XHRInterceptor from './interceptors/XHRInterceptor';
 import {
   NetworkType,
   type HttpHeaderReceivedCallback,
@@ -23,13 +20,18 @@ import {
   type WebSocketRecord,
   type WebSocketSendCallback,
 } from './types';
-import { createHeaderLine } from './utils';
+import { createHttpHeaderLine, createSocketDataLine } from './utils';
+import {
+  XHRInterceptor,
+  FetchInterceptor,
+  WebSocketInterceptor,
+} from './interceptors';
 
 interface AppInterceptorParams {
   autoEnabled?: boolean;
 }
 
-type CommonRecord = HttpRecord | WebSocketRecord;
+type CommonRecord = HttpRecord & WebSocketRecord;
 type NetworkRecords<T> = Map<NonNullable<ID>, T>;
 
 enableMapSet();
@@ -37,12 +39,12 @@ enableMapSet();
 export default function useNetworkInterceptor(params?: AppInterceptorParams) {
   const { autoEnabled = true } = params || {};
 
-  const [records, setRecords] = useImmer<NetworkRecords<CommonRecord>>(
-    new Map(),
-  );
+  const [networkRecords, setNetworkRecords] = useImmer<
+    NetworkRecords<CommonRecord>
+  >(new Map());
 
   const clearAllRecords = () => {
-    setRecords(new Map());
+    setNetworkRecords(new Map());
   };
 
   const isInterceptorEnabled = () =>
@@ -54,7 +56,7 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
     const openCallback: HttpOpenCallback = (id, type, method, url) => {
       if (!id) return;
 
-      setRecords((draft: NetworkRecords<HttpRecord>) => {
+      setNetworkRecords((draft: NetworkRecords<HttpRecord>) => {
         draft.set(id, { type, method, url });
       });
     };
@@ -66,13 +68,16 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
     ) => {
       if (!id) return;
 
-      setRecords((draft: NetworkRecords<HttpRecord>) => {
+      setNetworkRecords((draft: NetworkRecords<HttpRecord>) => {
         if (!draft.get(id)) return draft;
 
-        const currentHeaderLine = createHeaderLine(header, value);
+        const currentHeaderLine = createHttpHeaderLine(header, value);
 
         const fetchRequestHeaderLineRegex = RegExp(
-          createHeaderLine(NETWORK_INSPECTOR_REQUEST_HEADER, NetworkType.Fetch),
+          createHttpHeaderLine(
+            NETWORK_INSPECTOR_REQUEST_HEADER,
+            NetworkType.Fetch,
+          ),
           'gi',
         );
 
@@ -92,7 +97,7 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
     const sendCallback: HttpSendCallback = (id, data) => {
       if (!id) return;
 
-      setRecords((draft: NetworkRecords<HttpRecord>) => {
+      setNetworkRecords((draft: NetworkRecords<HttpRecord>) => {
         if (!draft.get(id)) return draft;
 
         draft.get(id)!.body = data;
@@ -107,7 +112,7 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
     ) => {
       if (!id) return;
 
-      setRecords((draft: NetworkRecords<HttpRecord>) => {
+      setNetworkRecords((draft: NetworkRecords<HttpRecord>) => {
         if (!draft.get(id)) return draft;
 
         draft.get(id)!.responseContentType = responseContentType;
@@ -126,7 +131,7 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
     ) => {
       if (!id) return;
 
-      setRecords((draft: NetworkRecords<HttpRecord>) => {
+      setNetworkRecords((draft: NetworkRecords<HttpRecord>) => {
         if (!draft.get(id)) return draft;
 
         draft.get(id)!.status = status;
@@ -152,16 +157,90 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
       .setHeaderReceivedCallback(headerReceivedCallback)
       .setResponseCallback(responseCallback)
       .enableInterception();
-  }, [setRecords]);
+  }, [setNetworkRecords]);
 
   const enableWebSocketInterception = useCallback(() => {
-    const connectCallback: WebSocketConnectCallback = () => {};
-    const sendCallback: WebSocketSendCallback = () => {};
-    const closeCallback: WebSocketCloseCallback = () => {};
+    const connectCallback: WebSocketConnectCallback = (
+      uri,
+      protocols,
+      options,
+      socketId,
+    ) => {
+      if (typeof socketId !== 'number') return;
+
+      setNetworkRecords((draft: NetworkRecords<WebSocketRecord>) => {
+        draft.set(`${socketId}`, {
+          uri,
+          type: NetworkType.Websocket,
+          protocols,
+          options,
+        });
+      });
+    };
+
+    const sendCallback: WebSocketSendCallback = (data, socketId) => {
+      if (typeof socketId !== 'number') return;
+
+      setNetworkRecords((draft: NetworkRecords<WebSocketRecord>) => {
+        if (!draft.get(`${socketId}`)) return draft;
+
+        draft.get(`${socketId}`)!.messages ??= '';
+        draft.get(`${socketId}`)!.messages += createSocketDataLine(
+          'Sent',
+          data,
+        );
+      });
+    };
+
+    const closeCallback: WebSocketCloseCallback = (code, reason, socketId) => {
+      if (typeof socketId !== 'number') return;
+
+      setNetworkRecords((draft: NetworkRecords<WebSocketRecord>) => {
+        if (!draft.get(`${socketId}`)) return draft;
+
+        draft.get(`${socketId}`)!.status = code;
+        draft.get(`${socketId}`)!.closeReason = reason;
+      });
+    };
+
     const onOpenCallback: WebSocketOnOpenCallback = () => {};
-    const onMessageCallback: WebSocketOnMessageCallback = () => {};
-    const onErrorCallback: WebSocketOnErrorCallback = () => {};
-    const onCloseCallback: WebSocketOnCloseCallback = () => {};
+
+    const onMessageCallback: WebSocketOnMessageCallback = (
+      socketId,
+      message,
+    ) => {
+      if (typeof socketId !== 'number') return;
+
+      setNetworkRecords((draft: NetworkRecords<WebSocketRecord>) => {
+        if (!draft.get(`${socketId}`)) return draft;
+
+        draft.get(`${socketId}`)!.messages ??= '';
+        draft.get(`${socketId}`)!.messages += createSocketDataLine(
+          'Received',
+          message,
+        );
+      });
+    };
+
+    const onErrorCallback: WebSocketOnErrorCallback = (socketId, data) => {
+      if (typeof socketId !== 'number') return;
+
+      setNetworkRecords((draft: NetworkRecords<WebSocketRecord>) => {
+        if (!draft.get(`${socketId}`)) return draft;
+
+        draft.get(`${socketId}`)!.serverError = data;
+      });
+    };
+
+    const onCloseCallback: WebSocketOnCloseCallback = (socketId, data) => {
+      if (typeof socketId !== 'number') return;
+
+      setNetworkRecords((draft: NetworkRecords<WebSocketRecord>) => {
+        if (!draft.get(`${socketId}`)) return draft;
+
+        draft.get(`${socketId}`)!.serverClose = data;
+      });
+    };
 
     WebSocketInterceptor.instance
       .setConnectCallback(connectCallback)
@@ -172,7 +251,7 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
       .setOnErrorCallback(onErrorCallback)
       .setOnCloseCallback(onCloseCallback)
       .enableInterception();
-  }, []);
+  }, [setNetworkRecords]);
 
   const enableInterception = useCallback(() => {
     if (isInterceptorEnabled()) return;
@@ -200,6 +279,6 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
     enableInterception,
     disableInterception,
     clearAllRecords,
-    records,
+    networkRecords,
   };
 }

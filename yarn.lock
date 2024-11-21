@@ -2873,6 +2873,7 @@ __metadata:
     "@types/react-test-renderer": "npm:^18.0.0"
     axios: "npm:^1.7.7"
     babel-jest: "npm:^29.6.3"
+    base64-js: "npm:^1.5.1"
     eslint: "npm:^8.19.0"
     immer: "npm:^10.1.1"
     jest: "npm:^29.6.3"

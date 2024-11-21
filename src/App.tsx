@@ -3,22 +3,34 @@ import {
   Button,
   FlatList,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import useNetworkInterceptor from './lib/useNetworkInterceptor';
+import { useEffect, useRef } from 'react';
 
 const Separator = () => <View style={styles.divider} />;
 
 export default function App() {
-  const { records, clearAllRecords } = useNetworkInterceptor();
+  const flatListRef = useRef<FlatList | null>(null);
+  const { networkRecords, clearAllRecords } = useNetworkInterceptor();
+
+  useEffect(() => {
+    if (networkRecords.size) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 1000);
+    }
+  }, [networkRecords.size]);
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
+        ref={flatListRef}
         ListHeaderComponent={
-          <View style={styles.header}>
+          <ScrollView horizontal style={styles.header}>
             <Button
               onPress={() => {
                 fetch('https://jsonplaceholder.typicode.com/todos/1');
@@ -71,12 +83,9 @@ export default function App() {
                 // Connection opened
                 socket.onopen = () => {
                   socket.send(message);
-                  console.log('Client is sending message:', message);
                 };
 
                 socket.onmessage = event => {
-                  console.log('Message from server:', event.data);
-
                   if (event.data === message) {
                     socket.close();
                   }
@@ -91,10 +100,10 @@ export default function App() {
               }}
               title="Clear All Records"
             />
-          </View>
+          </ScrollView>
         }
         stickyHeaderIndices={[0]}
-        data={Array.from(records)}
+        data={Array.from(networkRecords)}
         ItemSeparatorComponent={Separator}
         keyExtractor={([key]) => key}
         renderItem={({ item: [_, item] }) => {

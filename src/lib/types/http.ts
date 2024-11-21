@@ -1,5 +1,6 @@
-export interface Request {
-  type: 'xhr' | 'fetch' | 'websocket';
+import type { ID, NetworkRecord } from './common';
+
+export interface HttpRecord extends NetworkRecord {
   method?: string;
   url?: string;
   requestHeaders?: string;
@@ -13,19 +14,17 @@ export interface Request {
   responseType?: string;
 }
 
-export type ID = string | undefined;
-
-export type OpenCallback =
-  | ((id: ID, type: Request['type'], method: string, url: string) => void)
+export type HttpOpenCallback =
+  | ((id: ID, type: HttpRecord['type'], method: string, url: string) => void)
   | null;
 
-export type RequestHeaderCallback =
+export type HttpRequestHeaderCallback =
   | ((id: ID, header: string, value: string) => void)
   | null;
 
-export type SendCallback = ((id: ID, data?: any) => void) | null;
+export type HttpSendCallback = ((id: ID, data?: any) => void) | null;
 
-export type HeaderReceivedCallback =
+export type HttpHeaderReceivedCallback =
   | ((
       id: ID,
       responseContentType: string | undefined,
@@ -34,7 +33,7 @@ export type HeaderReceivedCallback =
     ) => void)
   | null;
 
-export type ResponseCallback =
+export type HttpResponseCallback =
   | ((
       id: ID,
       status: number | undefined,

@@ -6,7 +6,9 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios --simulator 'iPhone 15 Pro Max'",
     "pod:install": "cd ios && bundle exec pod install; cd ..",
-    "lint": "eslint .",
+    "lint": "eslint src/**/*.{ts,tsx} --fix",
+    "format": "prettier src/**/*.{ts,tsx} --write",
+    "fix:all": "yarn lint && yarn format",
     "start": "react-native start",
     "test": "jest"
   },

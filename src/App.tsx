@@ -1,42 +1,107 @@
 import axios from 'axios';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
-import useAppInterceptor from './lib/useAppInterceptor';
+import {
+  Button,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import useNetworkInterceptor from './lib/useNetworkInterceptor';
 
 const Separator = () => <View style={styles.divider} />;
 
 export default function App() {
-  const { requests } = useAppInterceptor();
+  const { records, clearAllRecords } = useNetworkInterceptor();
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <FlatList
         ListHeaderComponent={
           <View style={styles.header}>
-            <Text
+            <Button
               onPress={() => {
-                // enableInterceptions();
-              }}>
-              Hello World!!!
-            </Text>
+                fetch('https://jsonplaceholder.typicode.com/todos/1');
+              }}
+              title="FetchAPI: Get post"
+            />
 
-            <Text
+            <Button
               onPress={() => {
-                // fetch('https://jsonplaceholder.typicode.com/todos/1');
+                fetch('https://jsonplaceholder.typicode.com/posts', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    title: 'foo',
+                    body: 'bar',
+                    userId: 1,
+                  }),
+                  headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                  },
+                });
+              }}
+              title="FetchAPI: Create post"
+            />
+
+            <Button
+              onPress={() => {
                 axios('https://jsonplaceholder.typicode.com/todos/1');
-              }}>
-              Call API
-            </Text>
+              }}
+              title="Axios: Get post"
+            />
+
+            <Button
+              onPress={() => {
+                axios.post('https://jsonplaceholder.typicode.com/posts', {
+                  title: 'foo',
+                  body: 'bar',
+                  userId: 1,
+                });
+              }}
+              title="Axios: Create post"
+            />
+
+            <Button
+              onPress={() => {
+                // Create WebSocket connection.
+                const socket = new WebSocket('wss://echo.websocket.org');
+
+                const message = `Hello Server! It's ${new Date().toISOString()}`;
+
+                // Connection opened
+                socket.onopen = () => {
+                  socket.send(message);
+                  console.log('Client is sending message:', message);
+                };
+
+                socket.onmessage = event => {
+                  console.log('Message from server:', event.data);
+
+                  if (event.data === message) {
+                    socket.close();
+                  }
+                };
+              }}
+              title="Echo Websocket"
+            />
+
+            <Button
+              onPress={() => {
+                clearAllRecords();
+              }}
+              title="Clear All Records"
+            />
           </View>
         }
         stickyHeaderIndices={[0]}
-        data={Array.from(requests)}
+        data={Array.from(records)}
         ItemSeparatorComponent={Separator}
         keyExtractor={([key]) => key}
         renderItem={({ item: [_, item] }) => {
           return <Text>{JSON.stringify(item, null, 2)}</Text>;
         }}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -45,8 +110,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    borderWidth: 1,
-    gap: 16,
     backgroundColor: 'white',
   },
   divider: {

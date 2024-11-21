@@ -1,21 +1,16 @@
-import 'react-native-get-random-values';
-
-import { nanoid } from 'nanoid';
-import NetworkInterceptor from './NetworkInterceptor';
+import { NetworkType } from '../types';
+import { getInterceptorId } from '../utils';
+import HttpInterceptor from './HttpInterceptor';
 
 const originalXHROpen = XMLHttpRequest.prototype.open;
 const originalXHRSend = XMLHttpRequest.prototype.send;
 const originalXHRSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
 
-export default class XHRInterceptor extends NetworkInterceptor {
-  static #instance = new XHRInterceptor();
+export default class XHRInterceptor extends HttpInterceptor {
+  static instance = new XHRInterceptor();
 
   private constructor() {
     super();
-  }
-
-  static getInstance() {
-    return XHRInterceptor.#instance;
   }
 
   enableInterception() {
@@ -32,9 +27,9 @@ export default class XHRInterceptor extends NetworkInterceptor {
     const isInterceptorEnabled = () => this.isInterceptorEnabled;
 
     XMLHttpRequest.prototype.open = function (method, url) {
-      this._interceptionId = nanoid();
+      this._interceptionId = getInterceptorId();
 
-      openCallback?.(this._interceptionId, 'xhr',method, url);
+      openCallback?.(this._interceptionId, NetworkType.XHR, method, url);
 
       originalXHROpen.apply(
         this,
@@ -108,6 +103,6 @@ export default class XHRInterceptor extends NetworkInterceptor {
     XMLHttpRequest.prototype.open = originalXHROpen;
     XMLHttpRequest.prototype.setRequestHeader = originalXHRSetRequestHeader;
 
-    this.clearCallback();
+    this.clearCallbacks();
   }
 }

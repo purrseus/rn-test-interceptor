@@ -1,6 +1,7 @@
-import type { ID, NetworkRecord } from './common';
+import type { ID, NetworkRecord, NetworkType } from './common';
 
 export interface HttpRecord extends NetworkRecord {
+  type: NetworkType.Fetch | NetworkType.XHR;
   method?: string;
   url?: string;
   requestHeaders?: string;
@@ -8,7 +9,6 @@ export interface HttpRecord extends NetworkRecord {
   responseContentType?: string;
   responseSize?: number;
   responseHeaders?: string;
-  status?: number;
   timeout?: number;
   response?: any;
   responseType?: string;

@@ -1,7 +1,7 @@
 import { enableMapSet } from 'immer';
 import { useCallback, useEffect } from 'react';
 import { useImmer } from 'use-immer';
-import { NETWORK_INSPECTOR_REQUEST_HEADER } from './constants';
+import { NETWORK_INSPECTOR_REQUEST_HEADER } from '../constants';
 import {
   NetworkType,
   type HttpHeaderReceivedCallback,
@@ -11,6 +11,7 @@ import {
   type HttpResponseCallback,
   type HttpSendCallback,
   type ID,
+  type NetworkRecords,
   type WebSocketCloseCallback,
   type WebSocketConnectCallback,
   type WebSocketOnCloseCallback,
@@ -19,32 +20,31 @@ import {
   type WebSocketOnOpenCallback,
   type WebSocketRecord,
   type WebSocketSendCallback,
-} from './types';
-import { createHttpHeaderLine, createSocketDataLine } from './utils';
+} from '../types';
+import { createHttpHeaderLine, createSocketDataLine } from '../utils';
 import {
   XHRInterceptor,
   FetchInterceptor,
   WebSocketInterceptor,
-} from './interceptors';
+} from '../interceptors';
 
 interface AppInterceptorParams {
   autoEnabled?: boolean;
 }
 
 type CommonRecord = HttpRecord & WebSocketRecord;
-type NetworkRecords<T> = Map<NonNullable<ID>, T>;
 
 enableMapSet();
 
 export default function useNetworkInterceptor(params?: AppInterceptorParams) {
   const { autoEnabled = true } = params || {};
 
-  const [networkRecords, setNetworkRecords] = useImmer<
-    NetworkRecords<CommonRecord>
-  >(new Map());
+  const [networkRecords, setNetworkRecords] = useImmer(
+    new Map<NonNullable<ID>, CommonRecord>(),
+  );
 
   const clearAllRecords = () => {
-    setNetworkRecords(new Map());
+    setNetworkRecords(new Map<NonNullable<ID>, CommonRecord>());
   };
 
   const isInterceptorEnabled = () =>
@@ -137,7 +137,7 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
         draft.get(id)!.status = status;
         draft.get(id)!.timeout = timeout;
         draft.get(id)!.response = response;
-        draft.get(id)!.url = responseURL;
+        if (responseURL) draft.get(id)!.url = responseURL;
         draft.get(id)!.responseType = responseType;
       });
     };
@@ -171,7 +171,7 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
       setNetworkRecords((draft: NetworkRecords<WebSocketRecord>) => {
         draft.set(`${socketId}`, {
           uri,
-          type: NetworkType.Websocket,
+          type: NetworkType.WS,
           protocols,
           options,
         });

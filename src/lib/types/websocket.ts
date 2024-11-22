@@ -1,6 +1,7 @@
-import type { NetworkRecord } from './common';
+import type { NetworkRecord, NetworkType } from './common';
 
 export interface WebSocketRecord extends NetworkRecord {
+  type: NetworkType.WS;
   uri: string;
   protocols?: string | string[] | null;
   options?: {
@@ -8,10 +9,9 @@ export interface WebSocketRecord extends NetworkRecord {
     [optionName: string]: any;
   } | null;
   messages?: string;
-  status?: number;
   closeReason?: string;
-  serverError?: { message: string };
-  serverClose?: { code: number; reason: string };
+  serverError?: { message?: string };
+  serverClose?: { code?: number; reason?: string };
 }
 
 export type WebSocketConnectCallback =

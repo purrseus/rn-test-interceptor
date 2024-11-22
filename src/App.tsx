@@ -1,130 +1,114 @@
 import axios from 'axios';
+import { useRef } from 'react';
 import {
-  Button,
-  FlatList,
-  SafeAreaView,
-  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import useNetworkInterceptor from './lib/useNetworkInterceptor';
-import { useEffect, useRef } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import RelensInspector, {
+  type RelensInspectorMethods,
+} from './lib/ui/RelensInspector';
 
-const Separator = () => <View style={styles.divider} />;
+StatusBar.setTranslucent(true);
+StatusBar.setBackgroundColor('#00000000');
+StatusBar.setBarStyle('dark-content');
 
 export default function App() {
-  const flatListRef = useRef<FlatList | null>(null);
-  const { networkRecords, clearAllRecords } = useNetworkInterceptor();
-
-  useEffect(() => {
-    if (networkRecords.size) {
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 1000);
-    }
-  }, [networkRecords.size]);
+  const relensInspector = useRef<RelensInspectorMethods | null>(null);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        ref={flatListRef}
-        ListHeaderComponent={
-          <ScrollView horizontal style={styles.header}>
-            <Button
-              onPress={() => {
-                fetch('https://jsonplaceholder.typicode.com/todos/1');
-              }}
-              title="FetchAPI: Get post"
-            />
+    <SafeAreaProvider>
+      <View style={styles.container}>
+        <TouchableOpacity
+          onPress={() => {
+            fetch('https://jsonplaceholder.typicode.com/todos/1');
+          }}>
+          <Text>FetchAPI: Get post</Text>
+        </TouchableOpacity>
 
-            <Button
-              onPress={() => {
-                fetch('https://jsonplaceholder.typicode.com/posts', {
-                  method: 'POST',
-                  body: JSON.stringify({
-                    title: 'foo',
-                    body: 'bar',
-                    userId: 1,
-                  }),
-                  headers: {
-                    'Content-type': 'application/json; charset=UTF-8',
-                  },
-                });
-              }}
-              title="FetchAPI: Create post"
-            />
+        <TouchableOpacity
+          onPress={() => {
+            fetch('https://jsonplaceholder.typicode.com/posts', {
+              method: 'POST',
+              body: JSON.stringify({
+                title: 'foo',
+                body: 'bar',
+                userId: 1,
+              }),
+              headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+              },
+            });
+          }}>
+          <Text>FetchAPI: Create post</Text>
+        </TouchableOpacity>
 
-            <Button
-              onPress={() => {
-                axios('https://jsonplaceholder.typicode.com/todos/1');
-              }}
-              title="Axios: Get post"
-            />
+        <TouchableOpacity
+          onPress={() => {
+            axios('https://jsonplaceholder.typicode.com/todos/1');
+          }}>
+          <Text>Axios: Get post</Text>
+        </TouchableOpacity>
 
-            <Button
-              onPress={() => {
-                axios.post('https://jsonplaceholder.typicode.com/posts', {
-                  title: 'foo',
-                  body: 'bar',
-                  userId: 1,
-                });
-              }}
-              title="Axios: Create post"
-            />
+        <TouchableOpacity
+          onPress={() => {
+            axios.post('https://jsonplaceholder.typicode.com/posts', {
+              title: 'foo',
+              body: 'bar',
+              userId: 1,
+            });
+          }}>
+          <Text>Axios: Create post</Text>
+        </TouchableOpacity>
 
-            <Button
-              onPress={() => {
-                // Create WebSocket connection.
-                const socket = new WebSocket('wss://echo.websocket.org');
+        <TouchableOpacity
+          onPress={() => {
+            // Create WebSocket connection.
+            const socket = new WebSocket('wss://echo.websocket.org');
 
-                const message = `Hello Server! It's ${new Date().toISOString()}`;
+            const message = `Hello Server! It's ${new Date().toISOString()}`;
 
-                // Connection opened
-                socket.onopen = () => {
-                  socket.send(message);
-                };
+            // Connection opened
+            socket.onopen = () => {
+              socket.send(message);
+            };
 
-                socket.onmessage = event => {
-                  if (event.data === message) {
-                    socket.close();
-                  }
-                };
-              }}
-              title="Echo Websocket"
-            />
+            socket.onmessage = event => {
+              if (event.data === message) {
+                socket.close();
+              }
+            };
+          }}>
+          <Text>Echo Websocket</Text>
+        </TouchableOpacity>
 
-            <Button
-              onPress={() => {
-                clearAllRecords();
-              }}
-              title="Clear All Records"
-            />
-          </ScrollView>
-        }
-        stickyHeaderIndices={[0]}
-        data={Array.from(networkRecords)}
-        ItemSeparatorComponent={Separator}
-        keyExtractor={([key]) => key}
-        renderItem={({ item: [_, item] }) => {
-          return <Text>{JSON.stringify(item, null, 2)}</Text>;
-        }}
-      />
-    </SafeAreaView>
+        <TouchableOpacity
+          onPress={() => {
+            relensInspector.current?.show();
+          }}>
+          <Text>Show Inspector</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            relensInspector.current?.hide();
+          }}>
+          <Text>Hide Inspector</Text>
+        </TouchableOpacity>
+
+        <RelensInspector ref={relensInspector} />
+      </View>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  header: {
-    backgroundColor: 'white',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'black',
-  },
-  item: {},
-  itemText: {},
 });

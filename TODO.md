@@ -1,2 +1,1 @@
-- Continue with WebSocketInterceptor
 - Create UI

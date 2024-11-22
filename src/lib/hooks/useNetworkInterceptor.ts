@@ -1,7 +1,7 @@
 import { enableMapSet } from 'immer';
 import { useCallback, useEffect } from 'react';
 import { useImmer } from 'use-immer';
-import { NETWORK_INSPECTOR_REQUEST_HEADER } from './constants';
+import { NETWORK_INSPECTOR_REQUEST_HEADER } from '../constants';
 import {
   NetworkType,
   type HttpHeaderReceivedCallback,
@@ -19,13 +19,13 @@ import {
   type WebSocketOnOpenCallback,
   type WebSocketRecord,
   type WebSocketSendCallback,
-} from './types';
-import { createHttpHeaderLine, createSocketDataLine } from './utils';
+} from '../types';
+import { createHttpHeaderLine, createSocketDataLine } from '../utils';
 import {
   XHRInterceptor,
   FetchInterceptor,
   WebSocketInterceptor,
-} from './interceptors';
+} from '../interceptors';
 
 interface AppInterceptorParams {
   autoEnabled?: boolean;

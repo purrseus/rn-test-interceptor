@@ -10,8 +10,8 @@ export interface WebSocketRecord extends NetworkRecord {
   messages?: string;
   status?: number;
   closeReason?: string;
-  serverError?: { message: string };
-  serverClose?: { code: number; reason: string };
+  serverError?: { message?: string };
+  serverClose?: { code?: number; reason?: string };
 }
 
 export type WebSocketConnectCallback =

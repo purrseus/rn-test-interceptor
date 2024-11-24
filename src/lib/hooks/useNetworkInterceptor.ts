@@ -1,5 +1,5 @@
 import { enableMapSet } from 'immer';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useImmer } from 'use-immer';
 import { NETWORK_INSPECTOR_REQUEST_HEADER } from '../constants';
 import {
@@ -32,25 +32,23 @@ interface AppInterceptorParams {
   autoEnabled?: boolean;
 }
 
-type CommonRecord = HttpRecord & WebSocketRecord;
-
 enableMapSet();
+const initRecords = new Map<NonNullable<ID>, HttpRecord & WebSocketRecord>();
 
 export default function useNetworkInterceptor(params?: AppInterceptorParams) {
   const { autoEnabled = true } = params || {};
+  const [isInterceptorEnabled, setIsInterceptorEnabled] = useState(autoEnabled);
 
-  const [networkRecords, setNetworkRecords] = useImmer(
-    new Map<NonNullable<ID>, CommonRecord>(),
-  );
+  const [networkRecords, setNetworkRecords] = useImmer(initRecords);
 
-  const clearAllRecords = () => {
-    setNetworkRecords(new Map<NonNullable<ID>, CommonRecord>());
-  };
-
-  const isInterceptorEnabled = () =>
+  const _isInterceptorEnabled = () =>
     XHRInterceptor.instance.isInterceptorEnabled &&
     FetchInterceptor.instance.isInterceptorEnabled &&
     WebSocketInterceptor.instance.isInterceptorEnabled;
+
+  const clearAllRecords = () => {
+    setNetworkRecords(initRecords);
+  };
 
   const enableHttpInterceptions = useCallback(() => {
     const openCallback: HttpOpenCallback = (id, type, method, url) => {
@@ -254,18 +252,20 @@ export default function useNetworkInterceptor(params?: AppInterceptorParams) {
   }, [setNetworkRecords]);
 
   const enableInterception = useCallback(() => {
-    if (isInterceptorEnabled()) return;
+    if (_isInterceptorEnabled()) return;
 
     enableHttpInterceptions();
     enableWebSocketInterception();
+    setIsInterceptorEnabled(true);
   }, [enableHttpInterceptions, enableWebSocketInterception]);
 
   const disableInterception = useCallback(() => {
-    if (!isInterceptorEnabled()) return;
+    if (!_isInterceptorEnabled()) return;
 
     XHRInterceptor.instance.disableInterception();
     FetchInterceptor.instance.disableInterception();
     WebSocketInterceptor.instance.disableInterception();
+    setIsInterceptorEnabled(false);
   }, []);
 
   useEffect(() => {

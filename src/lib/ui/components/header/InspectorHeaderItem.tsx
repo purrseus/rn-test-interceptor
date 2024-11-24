@@ -1,13 +1,18 @@
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { hexToHexAlpha } from '../../../utils';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  type ImageRequireSource,
+} from 'react-native';
 
 interface InspectorHeaderItemProps {
-  title: string;
+  content?: ImageRequireSource | string;
   onPress: () => void;
 }
 
 export default function InspectorHeaderItem({
-  title,
+  content,
   onPress,
 }: InspectorHeaderItemProps) {
   return (
@@ -16,7 +21,11 @@ export default function InspectorHeaderItem({
       activeOpacity={0.8}
       style={styles.container}
     >
-      <Text style={styles.title}>{title}</Text>
+      {typeof content === 'string' ? (
+        <Text style={styles.title}>{content}</Text>
+      ) : (
+        <Image source={content} style={styles.icon} />
+      )}
     </TouchableOpacity>
   );
 }
@@ -30,7 +39,12 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
+    lineHeight: 17,
     fontWeight: '500',
     color: '#000000',
+  },
+  icon: {
+    width: 17,
+    height: 17,
   },
 });

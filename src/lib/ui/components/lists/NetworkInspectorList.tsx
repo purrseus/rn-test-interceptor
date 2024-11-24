@@ -23,9 +23,13 @@ export default function NetworkInspectorList({
   const listRef = useRef<FlatList | null>(null);
 
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (data.size) listRef.current?.scrollToEnd();
     }, 0);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [data.size]);
 
   const renderItem = useCallback<
@@ -57,7 +61,7 @@ export default function NetworkInspectorList({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 8,
+    paddingHorizontal: 8,
   },
   divider: {
     height: 1,

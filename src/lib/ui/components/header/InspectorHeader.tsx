@@ -2,17 +2,19 @@ import { ScrollView, StyleSheet } from 'react-native';
 import InspectorHeaderItem from './InspectorHeaderItem';
 
 interface InspectorHeaderProps {
-  hideInspector: () => void;
+  hideInspectorPanel: () => void;
   clearAllRecords: () => void;
-  moveInspectorToUp: () => void;
-  moveInspectorToDown: () => void;
+  toggleInspectorPosition: () => void;
+  toggleNetworkInterception: () => void;
+  isInterceptorEnabled: boolean;
 }
 
 export default function InspectorHeader({
-  hideInspector,
+  hideInspectorPanel,
   clearAllRecords,
-  moveInspectorToUp,
-  moveInspectorToDown,
+  toggleInspectorPosition,
+  toggleNetworkInterception,
+  isInterceptorEnabled,
 }: InspectorHeaderProps) {
   return (
     <ScrollView
@@ -21,16 +23,27 @@ export default function InspectorHeader({
       contentContainerStyle={styles.contentContainer}
       showsHorizontalScrollIndicator={false}
     >
-      <InspectorHeaderItem onPress={hideInspector} title="Hide Inspector" />
+      <InspectorHeaderItem
+        onPress={hideInspectorPanel}
+        content={require('../../../assets/hide.png')}
+      />
+
+      <InspectorHeaderItem
+        onPress={toggleInspectorPosition}
+        content={require('../../../assets/move.png')}
+      />
+
+      <InspectorHeaderItem
+        onPress={toggleNetworkInterception}
+        content={
+          isInterceptorEnabled ? 'Stop Recording Network' : 'Start Network Log'
+        }
+      />
 
       <InspectorHeaderItem
         onPress={clearAllRecords}
-        title="Clear All Network Records"
+        content="Clear All Network Records"
       />
-
-      <InspectorHeaderItem onPress={moveInspectorToUp} title="Move Up" />
-
-      <InspectorHeaderItem onPress={moveInspectorToDown} title="Move Down" />
     </ScrollView>
   );
 }

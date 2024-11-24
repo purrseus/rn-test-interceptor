@@ -21,7 +21,7 @@ export default function NetworkInspectorItem({
       const url = new URL(name);
       const suffixUrl = url.pathname + url.search;
 
-      if (suffixUrl === '/') return url.href;
+      if (suffixUrl === '/') return url.host;
       return suffixUrl;
     } catch (error) {
       return name;
@@ -33,15 +33,21 @@ export default function NetworkInspectorItem({
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
       <View style={[styles.column, styles.mainColumn]}>
-        <Text numberOfLines={1}>{requestName}</Text>
+        <Text numberOfLines={1} style={styles.text}>
+          {requestName}
+        </Text>
       </View>
 
       <View style={styles.column}>
-        <Text numberOfLines={1}>{status ?? 'pending'}</Text>
+        <Text numberOfLines={1} style={styles.text}>
+          {status ?? 'pending'}
+        </Text>
       </View>
 
       <View style={styles.column}>
-        <Text numberOfLines={1}>{type}</Text>
+        <Text numberOfLines={1} style={styles.text}>
+          {type}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -60,5 +66,9 @@ const styles = StyleSheet.create({
     flex: 1.5,
     flexShrink: 1,
     padding: 8,
+  },
+  text: {
+    color: '#000000',
+    fontSize: 14,
   },
 });

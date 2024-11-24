@@ -1,11 +1,8 @@
 import axios from 'axios';
-import { useRef } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import RelensInspector, { type RelensInspectorMethods } from './lib';
+import RelensInspector from './lib';
 
 export default function App() {
-  const relensInspector = useRef<RelensInspectorMethods | null>(null);
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -78,7 +75,7 @@ export default function App() {
 
       <TouchableOpacity
         onPress={() => {
-          relensInspector.current?.show();
+          RelensInspector.show();
         }}
       >
         <Text>Show Inspector</Text>
@@ -86,13 +83,13 @@ export default function App() {
 
       <TouchableOpacity
         onPress={() => {
-          relensInspector.current?.hide();
+          RelensInspector.hide();
         }}
       >
         <Text>Hide Inspector</Text>
       </TouchableOpacity>
 
-      <RelensInspector ref={relensInspector} />
+      <RelensInspector.Component />
     </View>
   );
 }
@@ -102,5 +99,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'white',
   },
 });

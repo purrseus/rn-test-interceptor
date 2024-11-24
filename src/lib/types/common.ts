@@ -11,8 +11,3 @@ export interface NetworkRecord {
 }
 
 export type NetworkRecords<T> = Map<NonNullable<ID>, T>;
-
-export interface RelensInspectorMethods {
-  show: () => void;
-  hide: () => void;
-}

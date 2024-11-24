@@ -1,72 +1,107 @@
-import { forwardRef, useImperativeHandle, useState } from 'react';
-import { Dimensions, SafeAreaView, StyleSheet, View } from 'react-native';
+import { createRef, useImperativeHandle, useState } from 'react';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../constants';
 import { useNetworkInterceptor } from '../hooks';
 import { hexToHexAlpha } from '../utils';
-import { InspectorHeader, NetworkInspectorList } from './components';
-import type { RelensInspectorMethods } from '../types';
+import {
+  InspectorBubble,
+  InspectorHeader,
+  NetworkInspectorList,
+} from './components';
+
+interface RelensInspectorMethods {
+  show: () => void;
+  hide: () => void;
+}
 
 interface RelensInspectorProps {
   networkInspectorAutoEnabled?: boolean;
+  bubbleSize?: number;
 }
 
-const RelensInspector = forwardRef<
-  RelensInspectorMethods,
-  RelensInspectorProps
->(({ networkInspectorAutoEnabled = true }, ref) => {
-  const [inspectorVisible, setInspectorVisible] = useState(false);
+const rootRef = createRef<RelensInspectorMethods>();
+
+const RelensInspectorComponent = ({
+  networkInspectorAutoEnabled = false,
+  bubbleSize = 40,
+}: RelensInspectorProps) => {
+  const [inspectorVisible, setInspectorVisible] = useState<
+    'invisible' | 'bubble' | 'panel'
+  >('invisible');
+
   const [inspectorPosition, setInspectorPosition] = useState<'top' | 'bottom'>(
     'bottom',
   );
 
-  const { networkRecords, clearAllRecords } = useNetworkInterceptor({
+  const {
+    networkRecords,
+    clearAllRecords,
+    enableInterception,
+    disableInterception,
+    isInterceptorEnabled,
+  } = useNetworkInterceptor({
     autoEnabled: networkInspectorAutoEnabled,
   });
 
-  const showInspector = () => {
-    setInspectorVisible(true);
+  const hideInspectorPanel = () => {
+    setInspectorVisible('bubble');
   };
 
-  const hideInspector = () => {
-    setInspectorVisible(false);
+  const showInspectorPanel = () => {
+    setInspectorVisible('panel');
   };
 
-  const moveInspectorToUp = () => {
-    setInspectorPosition('top');
+  const toggleNetworkInterception = () => {
+    isInterceptorEnabled ? disableInterception() : enableInterception();
   };
 
-  const moveInspectorToDown = () => {
-    setInspectorPosition('bottom');
+  const toggleInspectorPosition = () => {
+    setInspectorPosition(prevState =>
+      prevState === 'bottom' ? 'top' : 'bottom',
+    );
   };
 
   useImperativeHandle(
-    ref,
+    rootRef,
     () => ({
-      show: showInspector,
-      hide: hideInspector,
+      show: () => {
+        setInspectorVisible('bubble');
+      },
+      hide: () => {
+        setInspectorVisible('invisible');
+      },
     }),
     [],
   );
 
-  if (!inspectorVisible) return null;
+  if (inspectorVisible === 'invisible') return null;
+
+  if (inspectorVisible === 'bubble') {
+    return (
+      <View style={styles.bubbleBackdrop}>
+        <InspectorBubble
+          bubbleSize={bubbleSize}
+          showInspectorPanel={showInspectorPanel}
+        />
+      </View>
+    );
+  }
 
   return (
     // eslint-disable-next-line react-native/no-inline-styles
     <SafeAreaView style={[styles.container, { [inspectorPosition]: 0 }]}>
       <InspectorHeader
-        hideInspector={hideInspector}
+        hideInspectorPanel={hideInspectorPanel}
+        isInterceptorEnabled={isInterceptorEnabled}
+        toggleNetworkInterception={toggleNetworkInterception}
         clearAllRecords={clearAllRecords}
-        moveInspectorToUp={moveInspectorToUp}
-        moveInspectorToDown={moveInspectorToDown}
+        toggleInspectorPosition={toggleInspectorPosition}
       />
-
-      <View style={styles.divider} />
 
       <NetworkInspectorList data={networkRecords} />
     </SafeAreaView>
   );
-});
-
-const { width, height } = Dimensions.get('window');
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -74,15 +109,27 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     top: undefined,
     bottom: undefined,
-    zIndex: Infinity,
+    zIndex: 9999,
     backgroundColor: hexToHexAlpha('#000000', 0.25),
-    height: Math.min(width, height) * 0.75,
+    height: Math.min(SCREEN_WIDTH, SCREEN_HEIGHT) * 0.75,
   },
-  divider: {
-    height: 1,
-    backgroundColor: hexToHexAlpha('#000000', 0.25),
+  bubbleBackdrop: {
+    flex: 1,
+    ...StyleSheet.absoluteFillObject,
+    pointerEvents: 'box-none',
   },
 });
 
-RelensInspector.displayName = 'RelensInspector';
+RelensInspectorComponent.displayName = 'RelensInspector';
+
+const RelensInspector = {
+  show() {
+    rootRef.current?.show();
+  },
+  hide() {
+    rootRef.current?.hide();
+  },
+  Component: RelensInspectorComponent,
+};
+
 export default RelensInspector;

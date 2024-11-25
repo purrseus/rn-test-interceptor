@@ -1,13 +1,20 @@
 import { createRef, useImperativeHandle, useState } from 'react';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../constants';
-import { useNetworkInterceptor } from '../hooks';
+import { useLogInterceptor, useNetworkInterceptor } from '../hooks';
 import { hexToHexAlpha } from '../utils';
 import {
   InspectorBubble,
   InspectorHeader,
+  LogInspectorList,
   NetworkInspectorList,
 } from './components';
+import type {
+  InspectorPanel,
+  InspectorPosition,
+  InspectorVisibility,
+} from '../types';
+import RelensInspectorContext from './contexts/RelensInspectorContext';
 
 interface RelensInspectorMethods {
   show: () => void;
@@ -16,6 +23,7 @@ interface RelensInspectorMethods {
 
 interface RelensInspectorProps {
   networkInspectorAutoEnabled?: boolean;
+  logInspectorAutoEnabled?: boolean;
   bubbleSize?: number;
 }
 
@@ -23,83 +31,77 @@ const rootRef = createRef<RelensInspectorMethods>();
 
 const RelensInspectorComponent = ({
   networkInspectorAutoEnabled = false,
+  logInspectorAutoEnabled = false,
   bubbleSize = 40,
 }: RelensInspectorProps) => {
-  const [inspectorVisible, setInspectorVisible] = useState<
-    'invisible' | 'bubble' | 'panel'
-  >('invisible');
+  const [inspectorVisibility, setInspectorVisibility] =
+    useState<InspectorVisibility>('hidden');
 
-  const [inspectorPosition, setInspectorPosition] = useState<'top' | 'bottom'>(
-    'bottom',
-  );
+  const [inspectorPosition, setInspectorPosition] =
+    useState<InspectorPosition>('bottom');
 
-  const {
-    networkRecords,
-    clearAllRecords,
-    enableInterception,
-    disableInterception,
-    isInterceptorEnabled,
-  } = useNetworkInterceptor({
+  const [panelSelected, setPanelSelected] = useState<InspectorPanel>('network');
+
+  const networkInterceptor = useNetworkInterceptor({
     autoEnabled: networkInspectorAutoEnabled,
   });
 
-  const hideInspectorPanel = () => {
-    setInspectorVisible('bubble');
-  };
-
-  const showInspectorPanel = () => {
-    setInspectorVisible('panel');
-  };
-
-  const toggleNetworkInterception = () => {
-    isInterceptorEnabled ? disableInterception() : enableInterception();
-  };
-
-  const toggleInspectorPosition = () => {
-    setInspectorPosition(prevState =>
-      prevState === 'bottom' ? 'top' : 'bottom',
-    );
-  };
+  const logInterceptor = useLogInterceptor({
+    autoEnabled: logInspectorAutoEnabled,
+  });
 
   useImperativeHandle(
     rootRef,
     () => ({
       show: () => {
-        setInspectorVisible('bubble');
+        setInspectorVisibility('bubble');
       },
       hide: () => {
-        setInspectorVisible('invisible');
+        setInspectorVisibility('hidden');
       },
     }),
     [],
   );
 
-  if (inspectorVisible === 'invisible') return null;
+  let content;
 
-  if (inspectorVisible === 'bubble') {
-    return (
-      <View style={styles.bubbleBackdrop}>
-        <InspectorBubble
-          bubbleSize={bubbleSize}
-          showInspectorPanel={showInspectorPanel}
-        />
-      </View>
-    );
+  switch (inspectorVisibility) {
+    case 'bubble':
+      content = (
+        <View style={styles.bubbleBackdrop}>
+          <InspectorBubble bubbleSize={bubbleSize} />
+        </View>
+      );
+      break;
+    case 'panel':
+      content = (
+        // eslint-disable-next-line react-native/no-inline-styles
+        <SafeAreaView style={[styles.container, { [inspectorPosition]: 0 }]}>
+          <InspectorHeader />
+
+          {panelSelected === 'network' ? <NetworkInspectorList /> : <LogInspectorList />}
+        </SafeAreaView>
+      );
+      break;
+    default:
+      content = null;
   }
 
   return (
-    // eslint-disable-next-line react-native/no-inline-styles
-    <SafeAreaView style={[styles.container, { [inspectorPosition]: 0 }]}>
-      <InspectorHeader
-        hideInspectorPanel={hideInspectorPanel}
-        isInterceptorEnabled={isInterceptorEnabled}
-        toggleNetworkInterception={toggleNetworkInterception}
-        clearAllRecords={clearAllRecords}
-        toggleInspectorPosition={toggleInspectorPosition}
-      />
-
-      <NetworkInspectorList data={networkRecords} />
-    </SafeAreaView>
+    <RelensInspectorContext.Provider
+      value={{
+        inspectorVisibility,
+        setInspectorVisibility,
+        inspectorPosition,
+        setInspectorPosition,
+        panelSelected,
+        setPanelSelected,
+        networkInterceptor,
+        logInterceptor,
+      }}
+    >
+      {content}
+    </RelensInspectorContext.Provider>
   );
 };
 

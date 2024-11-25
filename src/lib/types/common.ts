@@ -1,3 +1,5 @@
+import type { Dispatch, SetStateAction } from 'react';
+
 export enum NetworkType {
   XHR = 'xhr',
   Fetch = 'fetch',
@@ -11,3 +13,11 @@ export interface NetworkRecord {
 }
 
 export type NetworkRecords<T> = Map<NonNullable<ID>, T>;
+
+export type InspectorVisibility = 'hidden' | 'bubble' | 'panel';
+
+export type InspectorPosition = 'top' | 'bottom';
+
+export type InspectorPanel = 'network' | 'log';
+
+export type SetState<T> = Dispatch<SetStateAction<T>>;

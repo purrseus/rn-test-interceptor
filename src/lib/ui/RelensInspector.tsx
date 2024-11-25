@@ -1,7 +1,16 @@
 import { createRef, useImperativeHandle, useState } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../constants';
+import {
+  SafeAreaView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useLogInterceptor, useNetworkInterceptor } from '../hooks';
+import type {
+  InspectorPanel,
+  InspectorPosition,
+  InspectorVisibility,
+} from '../types';
 import { hexToHexAlpha } from '../utils';
 import {
   InspectorBubble,
@@ -9,11 +18,6 @@ import {
   LogInspectorList,
   NetworkInspectorList,
 } from './components';
-import type {
-  InspectorPanel,
-  InspectorPosition,
-  InspectorVisibility,
-} from '../types';
 import RelensInspectorContext from './contexts/RelensInspectorContext';
 
 interface RelensInspectorMethods {
@@ -34,6 +38,8 @@ const RelensInspectorComponent = ({
   logInspectorAutoEnabled = false,
   bubbleSize = 40,
 }: RelensInspectorProps) => {
+  const { width, height } = useWindowDimensions();
+
   const [inspectorVisibility, setInspectorVisibility] =
     useState<InspectorVisibility>('hidden');
 
@@ -75,11 +81,20 @@ const RelensInspectorComponent = ({
       break;
     case 'panel':
       content = (
-        // eslint-disable-next-line react-native/no-inline-styles
-        <SafeAreaView style={[styles.container, { [inspectorPosition]: 0 }]}>
+        <SafeAreaView
+          style={[
+            styles.container,
+            // eslint-disable-next-line react-native/no-inline-styles
+            { [inspectorPosition]: 0, height: Math.min(width, height) * 0.75 },
+          ]}
+        >
           <InspectorHeader />
 
-          {panelSelected === 'network' ? <NetworkInspectorList /> : <LogInspectorList />}
+          {panelSelected === 'network' ? (
+            <NetworkInspectorList />
+          ) : (
+            <LogInspectorList />
+          )}
         </SafeAreaView>
       );
       break;
@@ -113,7 +128,6 @@ const styles = StyleSheet.create({
     bottom: undefined,
     zIndex: 9999,
     backgroundColor: hexToHexAlpha('#000000', 0.25),
-    height: Math.min(SCREEN_WIDTH, SCREEN_HEIGHT) * 0.75,
   },
   bubbleBackdrop: {
     flex: 1,

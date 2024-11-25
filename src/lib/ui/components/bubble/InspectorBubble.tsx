@@ -1,6 +1,11 @@
 import { useContext, useRef } from 'react';
-import { Animated, Image, PanResponder, StyleSheet } from 'react-native';
-import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../../../constants';
+import {
+  Animated,
+  Image,
+  PanResponder,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
 import { hexToHexAlpha } from '../../../utils';
 import RelensInspectorContext from '../../contexts/RelensInspectorContext';
 
@@ -8,13 +13,13 @@ interface InspectorBubbleProps {
   bubbleSize: number;
 }
 
-const SAFE_HEIGHT_VALUE = SCREEN_HEIGHT / 8;
-
 export default function InspectorBubble({ bubbleSize }: InspectorBubbleProps) {
+  const { width, height } = useWindowDimensions();
+  const verticalSafeValue = height / 8;
   const { setInspectorVisibility } = useContext(RelensInspectorContext)!;
 
   const pan = useRef(
-    new Animated.ValueXY({ x: 0, y: SAFE_HEIGHT_VALUE }),
+    new Animated.ValueXY({ x: 0, y: verticalSafeValue }),
   ).current;
 
   const panResponder = useRef(
@@ -38,13 +43,11 @@ export default function InspectorBubble({ bubbleSize }: InspectorBubbleProps) {
         pan.flattenOffset();
 
         const finalX =
-          gesture.moveX < (SCREEN_WIDTH - bubbleSize) / 2
-            ? 0
-            : SCREEN_WIDTH - bubbleSize;
+          gesture.moveX < (width - bubbleSize) / 2 ? 0 : width - bubbleSize;
 
         const finalY = Math.min(
-          Math.max(SAFE_HEIGHT_VALUE, gesture.moveY),
-          SCREEN_HEIGHT - SAFE_HEIGHT_VALUE - bubbleSize,
+          Math.max(verticalSafeValue, gesture.moveY),
+          height - verticalSafeValue - bubbleSize,
         );
 
         Animated.spring(pan, {

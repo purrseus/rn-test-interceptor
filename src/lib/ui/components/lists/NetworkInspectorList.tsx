@@ -1,36 +1,32 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import { FlatList, StyleSheet, View, type ListRenderItem } from 'react-native';
 import {
   NetworkType,
   type HttpRecord,
   type ID,
-  type NetworkRecords,
   type WebSocketRecord,
 } from '../../../types';
+import { hexToHexAlpha } from '../../../utils';
 import NetworkInspectorItem from './NetworkInspectorItem';
 import NetworkInspectorListHeader from './NetworkInspectorListHeader';
-import { hexToHexAlpha } from '../../../utils';
-
-interface NetworkInspectorListProps {
-  data: NetworkRecords<HttpRecord | WebSocketRecord>;
-}
+import RelensInspectorContext from '../../contexts/RelensInspectorContext';
 
 const Separator = () => <View style={styles.divider} />;
 
-export default function NetworkInspectorList({
-  data,
-}: NetworkInspectorListProps) {
+export default function NetworkInspectorList() {
+  const { networkInterceptor: { networkRecords } } = useContext(RelensInspectorContext)!;
+
   const listRef = useRef<FlatList | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (data.size) listRef.current?.scrollToEnd();
+      if (networkRecords.size) listRef.current?.scrollToEnd();
     }, 0);
 
     return () => {
       clearTimeout(timer);
     };
-  }, [data.size]);
+  }, [networkRecords.size]);
 
   const renderItem = useCallback<
     ListRenderItem<[NonNullable<ID>, HttpRecord | WebSocketRecord]>
@@ -47,7 +43,7 @@ export default function NetworkInspectorList({
   return (
     <FlatList
       ref={listRef}
-      data={Array.from(data)}
+      data={Array.from(networkRecords)}
       style={styles.container}
       ListHeaderComponent={NetworkInspectorListHeader}
       stickyHeaderIndices={[0]}

@@ -1,19 +1,18 @@
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import { Animated, Image, PanResponder, StyleSheet } from 'react-native';
 import { SCREEN_HEIGHT, SCREEN_WIDTH } from '../../../constants';
 import { hexToHexAlpha } from '../../../utils';
+import RelensInspectorContext from '../../contexts/RelensInspectorContext';
 
 interface InspectorBubbleProps {
   bubbleSize: number;
-  showInspectorPanel: () => void;
 }
 
 const SAFE_HEIGHT_VALUE = SCREEN_HEIGHT / 8;
 
-export default function InspectorBubble({
-  bubbleSize,
-  showInspectorPanel,
-}: InspectorBubbleProps) {
+export default function InspectorBubble({ bubbleSize }: InspectorBubbleProps) {
+  const { setInspectorVisibility } = useContext(RelensInspectorContext)!;
+
   const pan = useRef(
     new Animated.ValueXY({ x: 0, y: SAFE_HEIGHT_VALUE }),
   ).current;
@@ -55,6 +54,10 @@ export default function InspectorBubble({
       },
     }),
   ).current;
+
+  const showInspectorPanel = () => {
+    setInspectorVisibility('panel');
+  };
 
   return (
     <Animated.View

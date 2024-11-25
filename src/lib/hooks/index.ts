@@ -1,2 +1,2 @@
-export { default as useLogger } from './useLogger';
+export { default as useLogInterceptor } from './useLogInterceptor';
 export { default as useNetworkInterceptor } from './useNetworkInterceptor';

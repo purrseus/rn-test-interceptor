@@ -1,21 +1,49 @@
-import { ScrollView, StyleSheet } from 'react-native';
+import { useContext } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { hexToHexAlpha } from '../../../utils';
+import RelensInspectorContext from '../../contexts/RelensInspectorContext';
 import InspectorHeaderItem from './InspectorHeaderItem';
 
-interface InspectorHeaderProps {
-  hideInspectorPanel: () => void;
-  clearAllRecords: () => void;
-  toggleInspectorPosition: () => void;
-  toggleNetworkInterception: () => void;
-  isInterceptorEnabled: boolean;
-}
+export default function InspectorHeader() {
+  const {
+    setInspectorVisibility,
+    setInspectorPosition,
+    panelSelected,
+    setPanelSelected,
+    networkInterceptor,
+    logInterceptor,
+  } = useContext(RelensInspectorContext)!;
 
-export default function InspectorHeader({
-  hideInspectorPanel,
-  clearAllRecords,
-  toggleInspectorPosition,
-  toggleNetworkInterception,
-  isInterceptorEnabled,
-}: InspectorHeaderProps) {
+  const hideInspectorPanel = () => {
+    setInspectorVisibility('bubble');
+  };
+
+  const toggleNetworkInterception = () => {
+    networkInterceptor.isInterceptorEnabled
+      ? networkInterceptor.disableInterception()
+      : networkInterceptor.enableInterception();
+  };
+
+  const toggleLogInterception = () => {
+    logInterceptor.isInterceptorEnabled
+      ? logInterceptor.disableInterception()
+      : logInterceptor.enableInterception();
+  };
+
+  const toggleInspectorPosition = () => {
+    setInspectorPosition(prevState =>
+      prevState === 'bottom' ? 'top' : 'bottom',
+    );
+  };
+
+  const switchToNetwork = () => {
+    setPanelSelected('network');
+  };
+
+  const switchToLog = () => {
+    setPanelSelected('log');
+  };
+
   return (
     <ScrollView
       horizontal
@@ -34,15 +62,41 @@ export default function InspectorHeader({
       />
 
       <InspectorHeaderItem
-        onPress={toggleNetworkInterception}
-        content={
-          isInterceptorEnabled ? 'Stop Recording Network' : 'Start Network Log'
-        }
+        isLabel
+        isActive={panelSelected === 'network'}
+        content="Network Panel"
+        onPress={switchToNetwork}
       />
 
       <InspectorHeaderItem
-        onPress={clearAllRecords}
-        content="Clear All Network Records"
+        onPress={toggleNetworkInterception}
+        isActive={networkInterceptor.isInterceptorEnabled}
+        content={require('../../../assets/connect.png')}
+      />
+
+      <InspectorHeaderItem
+        onPress={networkInterceptor.clearAllRecords}
+        content={require('../../../assets/delete.png')}
+      />
+
+      <View style={styles.divider} />
+
+      <InspectorHeaderItem
+        isLabel
+        isActive={panelSelected === 'log'}
+        content="Log Panel"
+        onPress={switchToLog}
+      />
+
+      <InspectorHeaderItem
+        onPress={toggleLogInterception}
+        isActive={logInterceptor.isInterceptorEnabled}
+        content={require('../../../assets/terminal.png')}
+      />
+
+      <InspectorHeaderItem
+        onPress={logInterceptor.clearAllRecords}
+        content={require('../../../assets/delete.png')}
       />
     </ScrollView>
   );
@@ -55,5 +109,9 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 8,
     columnGap: 8,
+  },
+  divider: {
+    width: 2,
+    backgroundColor: hexToHexAlpha('#000000', 0.25),
   },
 });

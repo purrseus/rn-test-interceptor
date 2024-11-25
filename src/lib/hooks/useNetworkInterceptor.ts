@@ -28,15 +28,15 @@ import {
   WebSocketInterceptor,
 } from '../interceptors';
 
-interface AppInterceptorParams {
+interface NetworkInterceptorParams {
   autoEnabled?: boolean;
 }
 
 enableMapSet();
 const initRecords = new Map<NonNullable<ID>, HttpRecord & WebSocketRecord>();
 
-export default function useNetworkInterceptor(params?: AppInterceptorParams) {
-  const { autoEnabled = true } = params || {};
+export default function useNetworkInterceptor(params?: NetworkInterceptorParams) {
+  const { autoEnabled = false } = params || {};
   const [isInterceptorEnabled, setIsInterceptorEnabled] = useState(autoEnabled);
 
   const [networkRecords, setNetworkRecords] = useImmer(initRecords);

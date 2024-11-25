@@ -1,1 +1,1 @@
-- On/off network inspector
+- General/Header/Body/Response

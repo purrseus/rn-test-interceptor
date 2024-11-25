@@ -7,7 +7,9 @@ export default function App() {
     <View style={styles.container}>
       <TouchableOpacity
         onPress={() => {
-          fetch('https://jsonplaceholder.typicode.com/todos/1');
+          fetch('https://jsonplaceholder.typicode.com/todos/1')
+            .then(res => res.json())
+            .then(console.log);
         }}
       >
         <Text>FetchAPI: Get post</Text>
@@ -25,7 +27,9 @@ export default function App() {
             headers: {
               'Content-type': 'application/json; charset=UTF-8',
             },
-          });
+          })
+            .then(res => res.json())
+            .then(console.log);
         }}
       >
         <Text>FetchAPI: Create post</Text>
@@ -33,7 +37,9 @@ export default function App() {
 
       <TouchableOpacity
         onPress={() => {
-          axios('https://jsonplaceholder.typicode.com/posts?userId=1');
+          axios('https://jsonplaceholder.typicode.com/posts?userId=1').then(
+            console.log,
+          );
         }}
       >
         <Text>Axios: Get posts</Text>
@@ -41,11 +47,13 @@ export default function App() {
 
       <TouchableOpacity
         onPress={() => {
-          axios.post('https://jsonplaceholder.typicode.com/posts', {
-            title: 'foo',
-            body: 'bar',
-            userId: 1,
-          });
+          axios
+            .post('https://jsonplaceholder.typicode.com/posts', {
+              title: 'foo',
+              body: 'bar',
+              userId: 1,
+            })
+            .then(console.log);
         }}
       >
         <Text>Axios: Create post</Text>
@@ -61,9 +69,11 @@ export default function App() {
           // Connection opened
           socket.onopen = () => {
             socket.send(message);
+            console.log('send', message);
           };
 
           socket.onmessage = event => {
+            console.log('onmessage', event.data);
             if (event.data === message) {
               socket.close();
             }

@@ -7,14 +7,18 @@ import {
   type WebSocketRecord,
 } from '../../../types';
 import { hexToHexAlpha } from '../../../utils';
+import XenonInspectorContext from '../../contexts/XenonInspectorContext';
 import NetworkInspectorItem from './NetworkInspectorItem';
 import NetworkInspectorListHeader from './NetworkInspectorListHeader';
-import RelensInspectorContext from '../../contexts/RelensInspectorContext';
 
 const Separator = () => <View style={styles.divider} />;
 
 export default function NetworkInspectorList() {
-  const { networkInterceptor: { networkRecords } } = useContext(RelensInspectorContext)!;
+  const {
+    networkInterceptor: { networkRecords },
+    setPanelSelected,
+    detailsData,
+  } = useContext(XenonInspectorContext)!;
 
   const listRef = useRef<FlatList | null>(null);
 
@@ -30,15 +34,22 @@ export default function NetworkInspectorList() {
 
   const renderItem = useCallback<
     ListRenderItem<[NonNullable<ID>, HttpRecord | WebSocketRecord]>
-  >(({ item: [_, item] }) => {
-    return (
-      <NetworkInspectorItem
-        name={item.type === NetworkType.WS ? item.uri : item.url}
-        status={item.status}
-        type={item.type}
-      />
-    );
-  }, []);
+  >(
+    ({ item: [_, item] }) => {
+      return (
+        <NetworkInspectorItem
+          name={item.type === NetworkType.WS ? item.uri : item.url}
+          status={item.status}
+          type={item.type}
+          onPress={() => {
+            detailsData.current = { network: item };
+            setPanelSelected(null);
+          }}
+        />
+      );
+    },
+    [detailsData, setPanelSelected],
+  );
 
   return (
     <FlatList

@@ -1,4 +1,4 @@
-import { createRef, useImperativeHandle, useState } from 'react';
+import { createRef, useImperativeHandle, useRef, useState } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -7,38 +7,46 @@ import {
 } from 'react-native';
 import { useLogInterceptor, useNetworkInterceptor } from '../hooks';
 import type {
+  HttpRecord,
   InspectorPanel,
   InspectorPosition,
   InspectorVisibility,
+  LogRecord,
+  WebSocketRecord,
 } from '../types';
 import { hexToHexAlpha } from '../utils';
 import {
   InspectorBubble,
+  InspectorDetails,
   InspectorHeader,
   LogInspectorList,
   NetworkInspectorList,
 } from './components';
-import RelensInspectorContext from './contexts/RelensInspectorContext';
+import XenonInspectorContext from './contexts/XenonInspectorContext';
 
-interface RelensInspectorMethods {
+interface XenonInspectorMethods {
   show: () => void;
   hide: () => void;
 }
 
-interface RelensInspectorProps {
+interface XenonInspectorProps {
   networkInspectorAutoEnabled?: boolean;
   logInspectorAutoEnabled?: boolean;
   bubbleSize?: number;
 }
 
-const rootRef = createRef<RelensInspectorMethods>();
+const rootRef = createRef<XenonInspectorMethods>();
 
-const RelensInspectorComponent = ({
+const XenonInspectorComponent = ({
   networkInspectorAutoEnabled = false,
   logInspectorAutoEnabled = false,
   bubbleSize = 40,
-}: RelensInspectorProps) => {
+}: XenonInspectorProps) => {
   const { width, height } = useWindowDimensions();
+
+  const detailsData = useRef<Partial<
+    Record<InspectorPanel, LogRecord | HttpRecord | WebSocketRecord>
+  > | null>(null);
 
   const [inspectorVisibility, setInspectorVisibility] =
     useState<InspectorVisibility>('hidden');
@@ -46,7 +54,9 @@ const RelensInspectorComponent = ({
   const [inspectorPosition, setInspectorPosition] =
     useState<InspectorPosition>('bottom');
 
-  const [panelSelected, setPanelSelected] = useState<InspectorPanel>('network');
+  const [panelSelected, setPanelSelected] = useState<InspectorPanel | null>(
+    'network',
+  );
 
   const networkInterceptor = useNetworkInterceptor({
     autoEnabled: networkInspectorAutoEnabled,
@@ -90,11 +100,10 @@ const RelensInspectorComponent = ({
         >
           <InspectorHeader />
 
-          {panelSelected === 'network' ? (
-            <NetworkInspectorList />
-          ) : (
-            <LogInspectorList />
-          )}
+          {panelSelected === 'network' && <NetworkInspectorList />}
+          {panelSelected === 'log' && <LogInspectorList />}
+
+          {!panelSelected && !!detailsData.current && <InspectorDetails />}
         </SafeAreaView>
       );
       break;
@@ -103,7 +112,7 @@ const RelensInspectorComponent = ({
   }
 
   return (
-    <RelensInspectorContext.Provider
+    <XenonInspectorContext.Provider
       value={{
         inspectorVisibility,
         setInspectorVisibility,
@@ -113,10 +122,11 @@ const RelensInspectorComponent = ({
         setPanelSelected,
         networkInterceptor,
         logInterceptor,
+        detailsData,
       }}
     >
       {content}
-    </RelensInspectorContext.Provider>
+    </XenonInspectorContext.Provider>
   );
 };
 
@@ -136,16 +146,16 @@ const styles = StyleSheet.create({
   },
 });
 
-RelensInspectorComponent.displayName = 'RelensInspector';
+XenonInspectorComponent.displayName = 'XenonInspector';
 
-const RelensInspector = {
+const XenonInspector = {
   show() {
     rootRef.current?.show();
   },
   hide() {
     rootRef.current?.hide();
   },
-  Component: RelensInspectorComponent,
+  Component: XenonInspectorComponent,
 };
 
-export default RelensInspector;
+export default XenonInspector;

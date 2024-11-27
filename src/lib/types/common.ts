@@ -12,8 +12,6 @@ export interface NetworkRecord {
   status?: number;
 }
 
-export type NetworkRecords<T> = Map<NonNullable<ID>, T>;
-
 export type InspectorVisibility = 'hidden' | 'bubble' | 'panel';
 
 export type InspectorPosition = 'top' | 'bottom';

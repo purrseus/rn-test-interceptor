@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useRef } from 'react';
 import { FlatList, StyleSheet, View, type ListRenderItem } from 'react-native';
 import type { LogRecord } from '../../../types';
 import { hexToHexAlpha } from '../../../utils';
-import RelensInspectorContext from '../../contexts/RelensInspectorContext';
+import XenonInspectorContext from '../../contexts/XenonInspectorContext';
 import LogInspectorItem from './LogInspectorItem';
 
 const Separator = () => <View style={styles.divider} />;
@@ -10,7 +10,9 @@ const Separator = () => <View style={styles.divider} />;
 export default function LogInspectorList() {
   const {
     logInterceptor: { logRecords },
-  } = useContext(RelensInspectorContext)!;
+    setPanelSelected,
+    detailsData,
+  } = useContext(XenonInspectorContext)!;
 
   const listRef = useRef<FlatList | null>(null);
 
@@ -24,9 +26,20 @@ export default function LogInspectorList() {
     };
   }, [logRecords.length]);
 
-  const renderItem = useCallback<ListRenderItem<LogRecord>>(({ item }) => {
-    return <LogInspectorItem {...item} />;
-  }, []);
+  const renderItem = useCallback<ListRenderItem<LogRecord>>(
+    ({ item }) => {
+      return (
+        <LogInspectorItem
+          {...item}
+          onPress={() => {
+            detailsData.current = { network: item };
+            setPanelSelected(null);
+          }}
+        />
+      );
+    },
+    [detailsData, setPanelSelected],
+  );
 
   return (
     <FlatList

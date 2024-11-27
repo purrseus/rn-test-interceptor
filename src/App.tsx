@@ -1,6 +1,9 @@
 import axios from 'axios';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import RelensInspector from './lib';
+import XenonInspector from './lib';
+
+// StatusBar.setTranslucent(true);
+// StatusBar.setBackgroundColor('transparent');
 
 export default function App() {
   return (
@@ -85,7 +88,7 @@ export default function App() {
 
       <TouchableOpacity
         onPress={() => {
-          RelensInspector.show();
+          XenonInspector.show();
         }}
       >
         <Text>Show Inspector</Text>
@@ -93,13 +96,13 @@ export default function App() {
 
       <TouchableOpacity
         onPress={() => {
-          RelensInspector.hide();
+          XenonInspector.hide();
         }}
       >
         <Text>Hide Inspector</Text>
       </TouchableOpacity>
 
-      <RelensInspector.Component />
+      <XenonInspector.Component />
     </View>
   );
 }

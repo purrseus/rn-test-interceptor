@@ -7,7 +7,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { hexToHexAlpha } from '../../../utils';
-import RelensInspectorContext from '../../contexts/RelensInspectorContext';
+import XenonInspectorContext from '../../contexts/XenonInspectorContext';
 
 interface InspectorBubbleProps {
   bubbleSize: number;
@@ -16,7 +16,7 @@ interface InspectorBubbleProps {
 export default function InspectorBubble({ bubbleSize }: InspectorBubbleProps) {
   const { width, height } = useWindowDimensions();
   const verticalSafeValue = height / 8;
-  const { setInspectorVisibility } = useContext(RelensInspectorContext)!;
+  const { setInspectorVisibility } = useContext(XenonInspectorContext)!;
 
   const pan = useRef(
     new Animated.ValueXY({ x: 0, y: verticalSafeValue }),

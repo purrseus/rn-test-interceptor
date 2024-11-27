@@ -7,12 +7,14 @@ interface NetworkInspectorItemProps {
   name: HttpRecord['url'] | WebSocketRecord['uri'];
   status?: HttpRecord['status'] | WebSocketRecord['status'];
   type: NetworkType;
+  onPress: () => void;
 }
 
 export default function NetworkInspectorItem({
   name,
   status,
   type,
+  onPress,
 }: NetworkInspectorItemProps) {
   const requestName = useMemo(() => {
     if (!name) return '[failed]';
@@ -27,8 +29,6 @@ export default function NetworkInspectorItem({
       return name;
     }
   }, [name]);
-
-  const onPress = () => {};
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>

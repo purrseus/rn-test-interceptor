@@ -11,7 +11,6 @@ import {
   type HttpResponseCallback,
   type HttpSendCallback,
   type ID,
-  type NetworkRecords,
   type WebSocketCloseCallback,
   type WebSocketConnectCallback,
   type WebSocketOnCloseCallback,
@@ -31,6 +30,8 @@ import {
 interface NetworkInterceptorParams {
   autoEnabled?: boolean;
 }
+
+type NetworkRecords<T> = Map<NonNullable<ID>, T>;
 
 enableMapSet();
 const initRecords = new Map<NonNullable<ID>, HttpRecord & WebSocketRecord>();

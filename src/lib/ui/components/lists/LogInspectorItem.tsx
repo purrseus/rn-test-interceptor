@@ -1,18 +1,25 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import type { LogRecord } from '../../../types';
 
-interface LogInspectorItemProps extends LogRecord {}
+interface LogInspectorItemProps extends LogRecord {
+  onPress: () => void;
+}
 
-export default function LogInspectorItem({
-  type,
-  values,
-}: LogInspectorItemProps) {
+export default function LogInspectorItem({ type, values, onPress }: LogInspectorItemProps) {
   return (
-    <View style={styles.container}>
+    <TouchableOpacity onPress={onPress} style={styles.container}>
       <Text numberOfLines={1} style={styles.text}>
-        {type.toUpperCase()}: {JSON.stringify(values)}
+        {type.toUpperCase()}
+        {': '}
+        {values.map((value, index, array) => {
+          const isLastItem = index === array.length - 1;
+          const text =
+            typeof value === 'string' ? value : JSON.stringify(value);
+
+          return text + (isLastItem ? '' : ' ');
+        })}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 

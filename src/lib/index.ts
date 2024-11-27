@@ -1,2 +1,2 @@
-import RelensInspector from './ui/RelensInspector';
-export default RelensInspector;
+import XenonInspector from './ui/XenonInspector';
+export default XenonInspector;

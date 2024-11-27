@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { hexToHexAlpha } from '../../../utils';
 import XenonInspectorContext from '../../contexts/XenonInspectorContext';
-import InspectorHeaderItem from './InspectorHeaderItem';
+import InspectorHeaderItem from '../items/InspectorHeaderItem';
 
 export default function InspectorHeader() {
   const {
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     columnGap: 8,
   },
   divider: {
-    width: 2,
+    width: 1,
     backgroundColor: hexToHexAlpha('#000000', 0.25),
   },
 });

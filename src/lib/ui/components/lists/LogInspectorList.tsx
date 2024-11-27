@@ -3,7 +3,7 @@ import { FlatList, StyleSheet, View, type ListRenderItem } from 'react-native';
 import type { LogRecord } from '../../../types';
 import { hexToHexAlpha } from '../../../utils';
 import XenonInspectorContext from '../../contexts/XenonInspectorContext';
-import LogInspectorItem from './LogInspectorItem';
+import LogInspectorItem from '../items/LogInspectorItem';
 
 const Separator = () => <View style={styles.divider} />;
 

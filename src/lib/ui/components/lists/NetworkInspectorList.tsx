@@ -8,8 +8,8 @@ import {
 } from '../../../types';
 import { hexToHexAlpha } from '../../../utils';
 import XenonInspectorContext from '../../contexts/XenonInspectorContext';
-import NetworkInspectorItem from './NetworkInspectorItem';
-import NetworkInspectorListHeader from './NetworkInspectorListHeader';
+import NetworkInspectorItem from '../items/NetworkInspectorItem';
+import NetworkInspectorListHeader from '../header/NetworkInspectorListHeader';
 
 const Separator = () => <View style={styles.divider} />;
 

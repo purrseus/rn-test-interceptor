@@ -1,5 +1,6 @@
-import { useCallback, useContext, useEffect, useRef } from 'react';
+import { useCallback, useContext } from 'react';
 import { FlatList, StyleSheet, View, type ListRenderItem } from 'react-native';
+import { useScrollToBottom } from '../../../hooks';
 import {
   NetworkType,
   type HttpRecord,
@@ -8,8 +9,8 @@ import {
 } from '../../../types';
 import { hexToHexAlpha } from '../../../utils';
 import XenonInspectorContext from '../../contexts/XenonInspectorContext';
-import NetworkInspectorItem from '../items/NetworkInspectorItem';
 import NetworkInspectorListHeader from '../header/NetworkInspectorListHeader';
+import NetworkInspectorItem from '../items/NetworkInspectorItem';
 
 const Separator = () => <View style={styles.divider} />;
 
@@ -20,17 +21,7 @@ export default function NetworkInspectorList() {
     detailsData,
   } = useContext(XenonInspectorContext)!;
 
-  const listRef = useRef<FlatList | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (networkRecords.size) listRef.current?.scrollToEnd();
-    }, 0);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [networkRecords.size]);
+  const listRef = useScrollToBottom(networkRecords.size);
 
   const renderItem = useCallback<
     ListRenderItem<[NonNullable<ID>, HttpRecord | WebSocketRecord]>

@@ -1,3 +1,13 @@
+import type { LogRecord } from './types';
+
+export const limitChar = (value: any, limit = 5000) => {
+  const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+
+  return stringValue.length > limit
+    ? `${stringValue.slice(0, limit)}\n---LIMITED TO 5000 CHARACTERS---`
+    : stringValue;
+};
+
 export const createHttpHeaderLine = (key: string, value: string): string =>
   `${key}: ${value}\n`;
 
@@ -8,10 +18,23 @@ export const getHttpInterceptorId = () => {
 };
 
 export const createSocketDataLine = (prefix: 'Sent' | 'Received', data: any) =>
-  `${prefix}: ${JSON.stringify(data)}\n`;
+  `${prefix}: ${limitChar(data)}\n`;
 
 export const hexToHexAlpha = (hex: string, opacity: number) =>
   `${hex}${`${(Math.min(Math.max(opacity, 0), 1) * 255).toString(16)}0`.slice(
     0,
     2,
   )}`;
+
+export const formatMethod = (method?: string) => method ?? 'GET';
+
+export const formatStatusCode = (statusCode?: number) =>
+  `${statusCode ?? 'pending'}`;
+
+export const formatLog = ({ type, values }: LogRecord) => {
+  return `${type.toUpperCase()}: ${values.map((value, index, array) => {
+    const isLastItem = index === array.length - 1;
+
+    return limitChar(value) + (isLastItem ? '' : ' ');
+  })}}`;
+};

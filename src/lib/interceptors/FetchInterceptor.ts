@@ -1,6 +1,10 @@
 import { NETWORK_INSPECTOR_REQUEST_HEADER } from '../constants';
 import { NetworkType } from '../types';
-import { createHttpHeaderLine, getHttpInterceptorId } from '../utils';
+import {
+  createHttpHeaderLine,
+  formatMethod,
+  getHttpInterceptorId,
+} from '../utils';
 import HttpInterceptor from './HttpInterceptor';
 
 const originalFetch = global.fetch;
@@ -36,7 +40,7 @@ export default class FetchInterceptor extends HttpInterceptor {
       const requestInit: RequestInit = { ...init, headers: requestHeaders };
 
       //#region open
-      const method = init?.method ?? 'GET';
+      const method = formatMethod(init?.method);
 
       let url: string;
 

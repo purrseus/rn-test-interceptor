@@ -2,8 +2,8 @@ import type { ID, NetworkRecord, NetworkType } from './common';
 
 export interface HttpRecord extends NetworkRecord {
   type: NetworkType.Fetch | NetworkType.XHR;
-  method?: string;
-  url?: string;
+  method: string;
+  url: string;
   requestHeaders?: string;
   body?: any;
   responseContentType?: string;

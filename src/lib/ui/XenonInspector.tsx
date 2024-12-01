@@ -1,5 +1,6 @@
 import { createRef, useImperativeHandle, useRef, useState } from 'react';
 import {
+  Animated,
   SafeAreaView,
   StyleSheet,
   useWindowDimensions,
@@ -37,12 +38,15 @@ interface XenonInspectorProps {
 
 const rootRef = createRef<XenonInspectorMethods>();
 
-const XenonInspectorComponent = ({
+function XenonInspectorComponent({
   networkInspectorAutoEnabled = false,
   logInspectorAutoEnabled = false,
   bubbleSize = 40,
-}: XenonInspectorProps) => {
-  const { width, height } = useWindowDimensions();
+}: XenonInspectorProps) {
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const verticalSafeValue = screenHeight / 8;
+
+  const pan = useRef(new Animated.ValueXY({ x: 0, y: verticalSafeValue }));
 
   const detailsData = useRef<Partial<
     Record<InspectorPanel, LogRecord | HttpRecord | WebSocketRecord>
@@ -85,7 +89,7 @@ const XenonInspectorComponent = ({
     case 'bubble':
       content = (
         <View style={styles.bubbleBackdrop}>
-          <InspectorBubble bubbleSize={bubbleSize} />
+          <InspectorBubble bubbleSize={bubbleSize} pan={pan} />
         </View>
       );
       break;
@@ -95,7 +99,10 @@ const XenonInspectorComponent = ({
           style={[
             styles.container,
             // eslint-disable-next-line react-native/no-inline-styles
-            { [inspectorPosition]: 0, height: Math.min(width, height) * 0.75 },
+            {
+              [inspectorPosition]: 0,
+              height: Math.min(screenWidth, screenHeight) * 0.75,
+            },
           ]}
         >
           <InspectorHeader />
@@ -123,12 +130,15 @@ const XenonInspectorComponent = ({
         networkInterceptor,
         logInterceptor,
         detailsData,
+        screenWidth,
+        screenHeight,
+        verticalSafeValue,
       }}
     >
       {content}
     </XenonInspectorContext.Provider>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

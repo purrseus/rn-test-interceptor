@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { URL } from 'react-native-url-polyfill';
 import type { HttpRecord, NetworkType, WebSocketRecord } from '../../../types';
+import { formatStatusCode } from '../../../utils';
 
 interface NetworkInspectorItemProps {
   name: HttpRecord['url'] | WebSocketRecord['uri'];
@@ -40,7 +41,7 @@ export default function NetworkInspectorItem({
 
       <View style={styles.column}>
         <Text numberOfLines={1} style={styles.text}>
-          {status ?? 'pending'}
+          {formatStatusCode(status)}
         </Text>
       </View>
 

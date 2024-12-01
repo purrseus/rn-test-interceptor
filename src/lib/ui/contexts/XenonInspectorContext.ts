@@ -22,6 +22,9 @@ interface XenonInspectorContextValue {
   detailsData: MutableRefObject<Partial<
     Record<InspectorPanel, LogRecord | HttpRecord | WebSocketRecord>
   > | null>;
+  screenWidth: number;
+  screenHeight: number;
+  verticalSafeValue: number;
 }
 
 const XenonInspectorContext = createContext<XenonInspectorContextValue | null>(

@@ -1,6 +1,6 @@
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import type { LogRecord } from '../../../types';
-import { hexToHexAlpha } from '../../../utils';
+import { formatLog, hexToHexAlpha } from '../../../utils';
 
 interface LogDetailsProps {
   item: LogRecord;
@@ -9,7 +9,7 @@ interface LogDetailsProps {
 export default function LogDetails({ item }: LogDetailsProps) {
   return (
     <ScrollView style={styles.container}>
-      <Text>{JSON.stringify(item, null, 2)}</Text>
+      <Text>{formatLog(item)}</Text>
     </ScrollView>
   );
 }

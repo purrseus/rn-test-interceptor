@@ -40,9 +40,9 @@ export default function App() {
 
       <TouchableOpacity
         onPress={() => {
-          axios('https://jsonplaceholder.typicode.com/posts?userId=1').then(
-            console.log,
-          );
+          axios(
+            'https://jsonplaceholder.typicode.com/posts?userId=1',
+          ).then(console.log);
         }}
       >
         <Text>Axios: Get posts</Text>
@@ -102,7 +102,10 @@ export default function App() {
         <Text>Hide Inspector</Text>
       </TouchableOpacity>
 
-      <XenonInspector.Component />
+      <XenonInspector.Component
+        logInspectorAutoEnabled
+        networkInspectorAutoEnabled
+      />
     </View>
   );
 }

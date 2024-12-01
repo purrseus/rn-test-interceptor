@@ -19,3 +19,5 @@ export type InspectorPosition = 'top' | 'bottom';
 export type InspectorPanel = 'network' | 'log';
 
 export type SetState<T> = Dispatch<SetStateAction<T>>;
+
+export type NetworkTab = 'headers' | 'queryStringParameters' | 'body' | 'response' | 'messages';

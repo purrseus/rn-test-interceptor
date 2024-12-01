@@ -1,56 +1,59 @@
-import { useContext, useRef } from 'react';
-import {
-  Animated,
-  Image,
-  PanResponder,
-  StyleSheet,
-  useWindowDimensions,
-} from 'react-native';
+import { useContext, useRef, type MutableRefObject } from 'react';
+import { Animated, Image, PanResponder, StyleSheet } from 'react-native';
 import { hexToHexAlpha } from '../../../utils';
 import XenonInspectorContext from '../../contexts/XenonInspectorContext';
 
 interface InspectorBubbleProps {
   bubbleSize: number;
+  pan: MutableRefObject<Animated.ValueXY>;
 }
 
-export default function InspectorBubble({ bubbleSize }: InspectorBubbleProps) {
-  const { width, height } = useWindowDimensions();
-  const verticalSafeValue = height / 8;
-  const { setInspectorVisibility } = useContext(XenonInspectorContext)!;
-
-  const pan = useRef(
-    new Animated.ValueXY({ x: 0, y: verticalSafeValue }),
-  ).current;
+export default function InspectorBubble({
+  bubbleSize,
+  pan,
+}: InspectorBubbleProps) {
+  const {
+    setInspectorVisibility,
+    screenWidth,
+    screenHeight,
+    verticalSafeValue,
+  } = useContext(XenonInspectorContext)!;
 
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
-        // @ts-ignore
-        pan.setOffset({ x: pan.x._value, y: pan.y._value });
-        pan.setValue({ x: 0, y: 0 });
+        pan.current.setOffset({
+          // @ts-ignore
+          x: pan.current.x._value,
+          // @ts-ignore
+          y: pan.current.y._value,
+        });
+        pan.current.setValue({ x: 0, y: 0 });
       },
-      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
-        useNativeDriver: false,
-      }),
+      onPanResponderMove: Animated.event(
+        [null, { dx: pan.current.x, dy: pan.current.y }],
+        {
+          useNativeDriver: false,
+        },
+      ),
       onPanResponderRelease: (_, gesture) => {
-        if (gesture.moveX === 0 && gesture.moveY === 0) {
-          showInspectorPanel();
-          return;
-        }
+        if (!gesture.moveX && !gesture.moveY) showInspectorPanel();
 
-        pan.flattenOffset();
+        pan.current.flattenOffset();
 
         const finalX =
-          gesture.moveX < (width - bubbleSize) / 2 ? 0 : width - bubbleSize;
+          gesture.moveX < (screenWidth - bubbleSize) / 2
+            ? 0
+            : screenWidth - bubbleSize;
 
         const finalY = Math.min(
           Math.max(verticalSafeValue, gesture.moveY),
-          height - verticalSafeValue - bubbleSize,
+          screenHeight - verticalSafeValue - bubbleSize,
         );
 
-        Animated.spring(pan, {
+        Animated.spring(pan.current, {
           toValue: { x: finalX, y: finalY },
           useNativeDriver: false,
         }).start();
@@ -71,7 +74,7 @@ export default function InspectorBubble({ bubbleSize }: InspectorBubbleProps) {
           width: bubbleSize,
           height: bubbleSize,
           borderRadius: bubbleSize / 2,
-          transform: pan.getTranslateTransform(),
+          transform: pan.current.getTranslateTransform(),
         },
       ]}
     >

@@ -1,5 +1,6 @@
-import { useCallback, useContext, useEffect, useRef } from 'react';
+import { useCallback, useContext } from 'react';
 import { FlatList, StyleSheet, View, type ListRenderItem } from 'react-native';
+import { useScrollToBottom } from '../../../hooks';
 import type { LogRecord } from '../../../types';
 import { hexToHexAlpha } from '../../../utils';
 import XenonInspectorContext from '../../contexts/XenonInspectorContext';
@@ -14,17 +15,7 @@ export default function LogInspectorList() {
     detailsData,
   } = useContext(XenonInspectorContext)!;
 
-  const listRef = useRef<FlatList | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (logRecords.length) listRef.current?.scrollToEnd();
-    }, 0);
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [logRecords.length]);
+  const listRef = useScrollToBottom(logRecords.length);
 
   const renderItem = useCallback<ListRenderItem<LogRecord>>(
     ({ item }) => {
@@ -32,7 +23,7 @@ export default function LogInspectorList() {
         <LogInspectorItem
           {...item}
           onPress={() => {
-            detailsData.current = { network: item };
+            detailsData.current = { log: item };
             setPanelSelected(null);
           }}
         />

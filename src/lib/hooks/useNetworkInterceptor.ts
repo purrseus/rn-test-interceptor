@@ -34,6 +34,7 @@ interface NetworkInterceptorParams {
 type NetworkRecords<T> = Map<NonNullable<ID>, T>;
 
 enableMapSet();
+
 const initRecords = new Map<NonNullable<ID>, HttpRecord & WebSocketRecord>();
 
 export default function useNetworkInterceptor(params?: NetworkInterceptorParams) {

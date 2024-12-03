@@ -1,11 +1,11 @@
 import { useContext } from 'react';
 import type { HttpRecord, LogRecord, WebSocketRecord } from '../../../types';
-import XenonInspectorContext from '../../contexts/XenonInspectorContext';
+import InspectorContext from '../../contexts/InspectorContext';
 import LogDetails from './LogDetails';
 import NetworkDetails from './NetworkDetails';
 
 export default function InspectorDetails() {
-  const { detailsData } = useContext(XenonInspectorContext)!;
+  const { detailsData } = useContext(InspectorContext)!;
 
   if (!detailsData.current) return null;
 

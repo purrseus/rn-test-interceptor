@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { hexToHexAlpha } from '../../../utils';
-import XenonInspectorContext from '../../contexts/XenonInspectorContext';
+import InspectorContext from '../../contexts/InspectorContext';
 import InspectorHeaderItem from '../items/InspectorHeaderItem';
 
 export default function InspectorHeader() {
@@ -12,7 +12,7 @@ export default function InspectorHeader() {
     setPanelSelected,
     networkInterceptor,
     logInterceptor,
-  } = useContext(XenonInspectorContext)!;
+  } = useContext(InspectorContext)!;
 
   const hideInspectorPanel = () => {
     setInspectorVisibility('bubble');

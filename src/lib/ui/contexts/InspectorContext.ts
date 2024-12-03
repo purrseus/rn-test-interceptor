@@ -10,7 +10,7 @@ import type {
   WebSocketRecord,
 } from '../../types';
 
-interface XenonInspectorContextValue {
+interface InspectorContextValue {
   inspectorVisibility: InspectorVisibility;
   setInspectorVisibility: SetState<InspectorVisibility>;
   inspectorPosition: InspectorPosition;
@@ -27,8 +27,8 @@ interface XenonInspectorContextValue {
   verticalSafeValue: number;
 }
 
-const XenonInspectorContext = createContext<XenonInspectorContextValue | null>(
+const InspectorContext = createContext<InspectorContextValue | null>(
   null,
 );
 
-export default XenonInspectorContext;
+export default InspectorContext;

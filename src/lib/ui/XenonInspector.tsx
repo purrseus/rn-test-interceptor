@@ -23,7 +23,7 @@ import {
   LogInspectorList,
   NetworkInspectorList,
 } from './components';
-import XenonInspectorContext from './contexts/XenonInspectorContext';
+import InspectorContext from './contexts/InspectorContext';
 
 interface XenonInspectorMethods {
   show: () => void;
@@ -119,7 +119,7 @@ function XenonInspectorComponent({
   }
 
   return (
-    <XenonInspectorContext.Provider
+    <InspectorContext.Provider
       value={{
         inspectorVisibility,
         setInspectorVisibility,
@@ -136,7 +136,7 @@ function XenonInspectorComponent({
       }}
     >
       {content}
-    </XenonInspectorContext.Provider>
+    </InspectorContext.Provider>
   );
 }
 

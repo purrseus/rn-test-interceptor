@@ -1,10 +1,8 @@
-import type { LogRecord } from './types';
-
 export const limitChar = (value: any, limit = 5000) => {
   const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
 
   return stringValue.length > limit
-    ? `${stringValue.slice(0, limit)}\n---LIMITED TO 5000 CHARACTERS---`
+    ? `${stringValue.slice(0, limit)}\n---LIMITED TO ${limit} CHARACTERS---`
     : stringValue;
 };
 
@@ -31,7 +29,7 @@ export const formatMethod = (method?: string) => method ?? 'GET';
 export const formatStatusCode = (statusCode?: number) =>
   `${statusCode ?? 'pending'}`;
 
-export const formatLog = ({ type, values }: LogRecord) => {
+export const formatLog = (type: string, values: any[]) => {
   return `${type.toUpperCase()}: ${values.map((value, index, array) => {
     const isLastItem = index === array.length - 1;
 

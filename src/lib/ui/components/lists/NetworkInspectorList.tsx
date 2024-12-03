@@ -8,7 +8,7 @@ import {
   type WebSocketRecord,
 } from '../../../types';
 import { hexToHexAlpha } from '../../../utils';
-import XenonInspectorContext from '../../contexts/XenonInspectorContext';
+import InspectorContext from '../../contexts/InspectorContext';
 import NetworkInspectorListHeader from '../header/NetworkInspectorListHeader';
 import NetworkInspectorItem from '../items/NetworkInspectorItem';
 
@@ -19,7 +19,7 @@ export default function NetworkInspectorList() {
     networkInterceptor: { networkRecords },
     setPanelSelected,
     detailsData,
-  } = useContext(XenonInspectorContext)!;
+  } = useContext(InspectorContext)!;
 
   const listRef = useScrollToBottom(networkRecords.size);
 

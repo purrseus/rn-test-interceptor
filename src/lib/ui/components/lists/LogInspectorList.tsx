@@ -3,7 +3,7 @@ import { FlatList, StyleSheet, View, type ListRenderItem } from 'react-native';
 import { useScrollToBottom } from '../../../hooks';
 import type { LogRecord } from '../../../types';
 import { hexToHexAlpha } from '../../../utils';
-import XenonInspectorContext from '../../contexts/XenonInspectorContext';
+import InspectorContext from '../../contexts/InspectorContext';
 import LogInspectorItem from '../items/LogInspectorItem';
 
 const Separator = () => <View style={styles.divider} />;
@@ -13,7 +13,7 @@ export default function LogInspectorList() {
     logInterceptor: { logRecords },
     setPanelSelected,
     detailsData,
-  } = useContext(XenonInspectorContext)!;
+  } = useContext(InspectorContext)!;
 
   const listRef = useScrollToBottom(logRecords.length);
 

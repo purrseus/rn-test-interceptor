@@ -1,7 +1,7 @@
 import { useContext, useRef, type MutableRefObject } from 'react';
 import { Animated, Image, PanResponder, StyleSheet } from 'react-native';
 import { hexToHexAlpha } from '../../../utils';
-import XenonInspectorContext from '../../contexts/XenonInspectorContext';
+import InspectorContext from '../../contexts/InspectorContext';
 
 interface InspectorBubbleProps {
   bubbleSize: number;
@@ -17,7 +17,7 @@ export default function InspectorBubble({
     screenWidth,
     screenHeight,
     verticalSafeValue,
-  } = useContext(XenonInspectorContext)!;
+  } = useContext(InspectorContext)!;
 
   const panResponder = useRef(
     PanResponder.create({

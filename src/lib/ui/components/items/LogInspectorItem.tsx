@@ -14,7 +14,7 @@ export default function LogInspectorItem({
   return (
     <TouchableOpacity onPress={onPress} style={styles.container}>
       <Text numberOfLines={1} style={styles.text}>
-        {formatLog({ type, values })}
+        {formatLog(type, values)}
       </Text>
     </TouchableOpacity>
   );

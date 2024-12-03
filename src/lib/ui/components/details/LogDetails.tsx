@@ -9,7 +9,7 @@ interface LogDetailsProps {
 export default function LogDetails({ item }: LogDetailsProps) {
   return (
     <ScrollView style={styles.container}>
-      <Text>{formatLog(item)}</Text>
+      <Text>{formatLog(item.type, item.values)}</Text>
     </ScrollView>
   );
 }
